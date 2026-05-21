@@ -176,7 +176,7 @@ Based on Discogs community standards:
 
 ## 🔑 **Configuration**
 
-**Discogs API Token:** `CwfszcWdoSUrWhnvaAhzyUBWbfbXKdlaMAVtVGmd`
+**Discogs API Token:** Set via `DISCOGS_TOKEN` environment variable (get yours at [discogs.com/developers](https://www.discogs.com/developers))
 
 **MusicBrainz API:** Public endpoint (no token needed)
 

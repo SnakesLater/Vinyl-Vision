@@ -13,7 +13,7 @@ CATALOG_DIR = BASE_DIR / "catalog"
 IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 CATALOG_DIR.mkdir(parents=True, exist_ok=True)
 
-DISCOGS_TOKEN = os.getenv("DISCOGS_TOKEN", "CwfszcWdoSUrWhnvaAhzyUBWbfbXKdlaMAVtVGmd")
+DISCOGS_TOKEN = os.getenv("DISCOGS_TOKEN") or ""
 MB_UA     = "RecordCatalog/1.0 (snak3@hermes-agent)"
 PORT      = int(os.getenv("PORT", 8081))
 
