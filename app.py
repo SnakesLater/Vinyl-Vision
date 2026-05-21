@@ -14,7 +14,7 @@ IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 CATALOG_DIR.mkdir(parents=True, exist_ok=True)
 
 DISCOGS_TOKEN = os.getenv("DISCOGS_TOKEN") or ""
-MB_UA     = "RecordCatalog/1.0 (snak3@hermes-agent)"
+MB_UA     = "Vinyl-Vision/1.0 (github.com/SnakesLater/Vinyl-Vision)"
 PORT      = int(os.getenv("PORT", 8081))
 
 app = FastAPI(title="Record Catalog API v0.1")
