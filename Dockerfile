@@ -1,26 +1,19 @@
-# record-catalog-sam: Record Catalog Music App for Investor Demo
-# Uses Discogs API for album metadata lookups
-# Drop album art images to identify catalog entries
-
-FROM node:20-alpine
+FROM python:3.14-slim
 
 WORKDIR /app
 
-# Copy static assets first (for better Docker caching)
-COPY index.html ./
-COPY app.html ./
+# System deps for PyTorch (CPU-only)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the express server (simple, no dependencies needed)
-COPY server.js ./
+# Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy package.json for npm install
-COPY package.json ./
+# App source
+COPY . .
 
-# Install Node.js dependencies
-RUN npm install
-
-# Expose the app port
 EXPOSE 8081
 
-# Default command
-CMD ["node", "server.js"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8081"]

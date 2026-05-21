@@ -1,17 +1,10 @@
-# docker-compose.yml for Record Catalog - V1 Demo Version
-# Follows our established Docker compose workflow (single container, localhost testing)
-
-version: '3.8'
-
 services:
-  record-catalog:
+  vinyl-vision:
     build: .
-    ports:
-      - "8081:8081"
+    network_mode: host
     volumes:
-      - ./catalog:/app/catalog:ro
-      - ./images:/app/images:ro
+      - ./catalog:/app/catalog
+      - ./images:/app/images
     environment:
-      - DISCOGS_API_KEY=${DISCOGS_API_KEY}
-    # Remove restart policy for local dev testing
-    # restart: unless-stopped
+      - DISCOGS_TOKEN=${DISCOGS_TOKEN}
+      - HF_TOKEN=${HF_TOKEN}

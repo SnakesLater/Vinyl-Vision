@@ -1,8 +1,12 @@
-DISCOGS_API_KEY=${DISCOGS_API_KEY:-}
-PORT=8081
-
-# Run the container as root by default (can be overridden with --user node)
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nodejs
-
-# Start the application
-CMD ["node", "server.js"]
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.gitignore
+Dockerfile.node
+docker-compose.node.yml
+.dockerignore.old
+.DS_Store
+.pytest_cache/
+tests/__pycache__/

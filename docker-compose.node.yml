@@ -1,0 +1,17 @@
+# docker-compose.yml for Record Catalog - V1 Demo Version
+# Follows our established Docker compose workflow (single container, localhost testing)
+
+version: '3.8'
+
+services:
+  record-catalog:
+    build: .
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./catalog:/app/catalog:ro
+      - ./images:/app/images:ro
+    environment:
+      - DISCOGS_API_KEY=${DISCOGS_API_KEY}
+    # Remove restart policy for local dev testing
+    # restart: unless-stopped
