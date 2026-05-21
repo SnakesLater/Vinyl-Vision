@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Catalog</title>
+    <title>Vinyl-Vision</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -13,79 +13,46 @@
             color: #fff;
             padding: 20px;
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 10px; font-size: 2em; }
-        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .container { max-width: 960px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 4px; font-size: 1.8em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 0.85em; }
+
+        /* Tabs */
+        .tab-bar { display: flex; gap: 0; margin-bottom: 25px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #94a3b8; font-weight: 600; transition: all 0.2s; border: none; background: transparent; font-size: 1em; }
+        .tab:hover { background: rgba(74,144,217,0.1); color: #fff; }
+        .tab.active { background: rgba(74,144,217,0.2); color: #66a3ff; box-shadow: inset 0 -2px 0 #4a90d9; }
+
+        .section { display: none; }
+        .section.active { display: block; }
 
         /* Drop Zone */
         #drop-zone {
-            border: 3px dashed #4a90d9;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            background: rgba(74, 144, 217, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            margin-bottom: 20px;
+            border: 3px dashed #4a90d9; border-radius: 12px; padding: 40px;
+            text-align: center; background: rgba(74, 144, 217, 0.1);
+            transition: all 0.3s; cursor: pointer; margin-bottom: 20px;
         }
-        #drop-zone.dragover {
-            background: rgba(74, 144, 217, 0.2);
-            border-color: #66a3ff;
-            transform: scale(1.02);
-        }
+        #drop-zone.dragover { background: rgba(74, 144, 217, 0.2); border-color: #66a3ff; transform: scale(1.02); }
         #drop-zone p { font-size: 1.2em; }
+        #drop-zone .hint { font-size: 0.8em; color: #888; margin-top: 6px; }
 
         /* Preview */
         #preview-container { display: none; text-align: center; margin-bottom: 20px; }
-        #preview-image {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
-        }
+        #preview-image { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 10px; }
 
         /* Progress bar */
         #progress-container { display: none; margin-bottom: 25px; }
-        #progress-track {
-            background: #334155;
-            border-radius: 8px;
-            height: 8px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        #progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #4a90d9, #66a3ff);
-            transition: width 0.4s ease;
-            border-radius: 8px;
-        }
-        #progress-label {
-            text-align: center;
-            color: #94a3b8;
-            font-size: 0.9em;
-            margin-bottom: 4px;
-        }
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75em;
-            color: #475569;
-        }
+        #progress-track { background: #334155; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #4a90d9, #66a3ff); transition: width 0.4s ease; border-radius: 8px; }
+        #progress-label { text-align: center; color: #94a3b8; font-size: 0.9em; margin-bottom: 4px; }
+        .progress-steps { display: flex; justify-content: space-between; font-size: 0.75em; color: #475569; }
         .progress-steps .step.active { color: #66a3ff; font-weight: 600; }
         .progress-steps .step.done { color: #4ade80; }
 
         /* Results */
         #search-results { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; }
 
-        /* Candidate rows */
-        .candidate-row {
-            display: flex; align-items: center; gap: 15px;
-            background: rgba(255,255,255,0.08); border-radius: 8px;
-            padding: 12px; margin-bottom: 10px; cursor: pointer;
-            border: 2px solid transparent; transition: all 0.2s;
-        }
+        .candidate-row { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .candidate-row:hover { background: rgba(74,144,217,0.15); }
         .candidate-row.selected { background: rgba(74,144,217,0.25); border-color: #4a90d9; }
         .candidate-thumb { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #334155; }
@@ -95,21 +62,12 @@
         .candidate-title { color: #66a3ff; font-size: 0.95em; }
         .candidate-year { color: #818cf8; font-size: 0.8em; margin-top: 2px; }
         .match-pct { color: #4ade80; font-size: 0.85em; font-weight: 600; margin-left: 8px; }
-        .index-badge {
-            display: inline-block;
-            background: rgba(74, 222, 128, 0.15);
-            color: #4ade80;
-            font-size: 0.7em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
-            font-weight: 600;
-        }
+        .index-badge { display: inline-block; background: rgba(74, 222, 128, 0.15); color: #4ade80; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
         .selected-label { color: #4ade80; font-size: 0.8em; font-weight: 600; margin-left: 10px; }
 
         /* Metadata */
         #metadata-display { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; margin-top: 20px; }
-        #metadata-display h3 { color: #4a90d9; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        #metadata-display h3 { color: #4a90d9; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 1em; }
         .metadata-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .metadata-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; }
         .metadata-item .label { color: #888; font-size: 0.8em; display: block; margin-bottom: 5px; }
@@ -117,7 +75,7 @@
 
         /* Form */
         .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; color: #aaa; }
+        label { display: block; margin-bottom: 5px; color: #aaa; font-size: 0.9em; }
         input, select {
             width: 100%; padding: 10px; border-radius: 6px;
             border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1em;
@@ -131,91 +89,223 @@
         button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,144,217,0.4); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Catalog stats */
-        #catalog-stats { text-align: center; padding: 20px; background: rgba(74,144,217,0.1); border-radius: 10px; margin-top: 20px; }
-
-        .error   { background: rgba(239,68,68,0.2); border-left: 4px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        .error { background: rgba(239,68,68,0.2); border-left: 4px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 6px; margin: 10px 0; }
         .success { background: rgba(74,144,217,0.2); border-left: 4px solid #4a90d9; padding: 15px; border-radius: 6px; margin: 10px 0; }
 
-        /* Fallback manual search */
         #fallback-search { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
         .fallback-row { display: flex; gap: 10px; margin: 15px 0; }
         .fallback-row input { flex: 1; }
         #fallback-message { color: #fbbf24; font-size: 0.9em; margin-bottom: 10px; }
+
+        /* ── Catalog ── */
+
+        .catalog-stats-bar {
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+        }
+        .catalog-stats-bar .stat { color: #94a3b8; font-size: 0.85em; text-align: center; }
+        .catalog-stats-bar .stat strong { color: #fff; display: block; font-size: 1.3em; margin-top: 2px; }
+
+        .catalog-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; gap: 10px; flex-wrap: wrap;
+        }
+        .view-toggle { display: flex; gap: 0; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; }
+        .view-toggle button {
+            padding: 8px 18px; border: none; background: transparent; color: #94a3b8;
+            cursor: pointer; font-size: 0.85em; transition: all 0.2s; margin: 0; border-radius: 0;
+        }
+        .view-toggle button:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .view-toggle button.active { background: rgba(74,144,217,0.2); color: #66a3ff; box-shadow: none; }
+        #cat-search {
+            padding: 8px 14px; border-radius: 8px; border: 1px solid #334155;
+            background: #0f172a; color: #fff; font-size: 0.85em; width: 220px;
+        }
+
+        .cat-empty {
+            text-align: center; padding: 60px 20px; color: #64748b;
+        }
+        .cat-empty strong { color: #94a3b8; }
+
+        /* Grid */
+        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+        .grid-card { background: rgba(255,255,255,0.04); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.25s; }
+        .grid-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.4); background: rgba(255,255,255,0.08); }
+        .grid-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #0f172a; }
+        .grid-card .body { padding: 10px 12px 12px; }
+        .grid-card .artist { font-weight: 600; font-size: 0.8em; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .grid-card .title { color: #66a3ff; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .grid-card .price { color: #4ade80; font-size: 0.85em; font-weight: 700; margin-top: 5px; }
+
+        /* List */
+        .catalog-list { display: flex; flex-direction: column; gap: 12px; }
+        .list-item { display: flex; gap: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; align-items: stretch; }
+        .list-item:hover { background: rgba(74,144,217,0.1); }
+        .list-item img { width: 110px; height: 110px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #0f172a; }
+        .list-item .body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+        .list-item .artist { font-weight: 600; color: #e2e8f0; font-size: 0.95em; }
+        .list-item .title { color: #66a3ff; font-size: 0.9em; }
+        .list-item .meta { color: #94a3b8; font-size: 0.8em; margin-top: 3px; }
+        .list-item .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .list-item .tag { background: rgba(74,144,217,0.15); color: #66a3ff; font-size: 0.7em; padding: 2px 10px; border-radius: 10px; }
+        .list-item .info-text { color: #94a3b8; font-size: 0.8em; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .list-item .price-col { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; min-width: 90px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.06); }
+        .list-item .price-col .amt { color: #4ade80; font-size: 1.2em; font-weight: 700; }
+        .list-item .price-col .lbl { color: #64748b; font-size: 0.7em; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            z-index: 100; justify-content: center; align-items: center; padding: 20px; overflow-y: auto;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 14px; max-width: 580px; width: 100%; margin: auto;
+            padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative;
+        }
+        .modal-close {
+            position: absolute; top: 12px; right: 16px;
+            background: none; border: none; color: #64748b; font-size: 1.8em; cursor: pointer; line-height: 1;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal .cover { width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; margin-bottom: 18px; background: #0f172a; }
+        .modal h2 { font-size: 1.3em; margin-bottom: 2px; }
+        .modal .sub { color: #94a3b8; margin-bottom: 16px; font-size: 0.9em; }
+        .modal .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .modal .ditem { background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 6px; }
+        .modal .ditem .lbl { color: #64748b; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal .ditem .val { color: #e2e8f0; font-size: 0.9em; margin-top: 2px; }
+        .modal .ditem .val a { color: #66a3ff; text-decoration: none; }
+        .modal .ditem .val a:hover { text-decoration: underline; }
+        .modal .info-block {
+            background: rgba(255,255,255,0.03); padding: 16px; border-radius: 8px;
+            margin-bottom: 16px; color: #cbd5e1; font-size: 0.9em; line-height: 1.6;
+        }
+        .modal .info-block .lbl { color: #64748b; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .modal .price-block {
+            background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
+            padding: 14px; border-radius: 8px; text-align: center;
+        }
+        .modal .price-block .amt { color: #4ade80; font-size: 1.5em; font-weight: 700; }
+        .modal .price-block .lbl { color: #64748b; font-size: 0.75em; }
+        .modal .price-block .range { color: #94a3b8; font-size: 0.85em; margin-top: 4px; }
+        .modal .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+        .modal .tag { background: rgba(74,144,217,0.15); color: #66a3ff; font-size: 0.75em; padding: 3px 12px; border-radius: 12px; }
+
+        .empty-catalog { text-align: center; padding: 80px 20px; color: #64748b; }
+        .empty-catalog strong { color: #94a3b8; display: block; font-size: 1.2em; margin-bottom: 6px; }
+
+        @media (max-width: 600px) {
+            .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .list-item { flex-wrap: wrap; }
+            .list-item img { width: 80px; height: 80px; }
+            .list-item .price-col { border-left: none; border-top: 1px solid rgba(255,255,255,0.06); padding-left: 0; padding-top: 8px; min-width: 100%; flex-direction: row; justify-content: space-between; }
+            .modal .dgrid { grid-template-columns: 1fr; }
+            .catalog-toolbar { flex-direction: column; align-items: stretch; }
+            #cat-search { width: 100%; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Record Catalog</h1>
-        <p class="subtitle">Drag & Drop album art &rarr; Identify &rarr; Catalog</p>
+        <h1>Vinyl-Vision</h1>
+        <p class="subtitle">Drop album art &rarr; Identify &rarr; Catalog &rarr; Browse</p>
 
-        <!-- Drop Zone -->
-        <div id="drop-zone">
-            <p><strong>Drag & drop an album cover image here</strong></p>
-            <p style="font-size: 0.8em; color: #888;">or click to browse</p>
-            <input type="file" id="file-input" accept="image/*" style="display: none;" />
+        <!-- Tab bar -->
+        <div class="tab-bar">
+            <button class="tab active" data-tab="search">&#x1F50D; Search</button>
+            <button class="tab" data-tab="catalog">&#x1F4DA; Catalog</button>
         </div>
 
-        <!-- Preview -->
-        <div id="preview-container">
-            <img id="preview-image" alt="Album preview" />
+        <!-- ── Search Section ── -->
+        <div class="section active" id="section-search">
+            <div id="drop-zone">
+                <p><strong>Drag & drop an album cover image here</strong></p>
+                <p class="hint">or click to browse</p>
+                <input type="file" id="file-input" accept="image/*" style="display: none;" />
+            </div>
 
-            <!-- Progress Bar -->
-            <div id="progress-container">
-                <div id="progress-track"><div id="progress-fill"></div></div>
-                <div id="progress-label">Analyzing cover art...</div>
-                <div class="progress-steps">
-                    <span class="step" id="step-analyze">Analyze</span>
-                    <span class="step" id="step-search">Search MB</span>
-                    <span class="step" id="step-rank">Rank</span>
-                    <span class="step" id="step-done">Done</span>
+            <div id="preview-container">
+                <img id="preview-image" alt="Album preview" />
+                <div id="progress-container">
+                    <div id="progress-track"><div id="progress-fill"></div></div>
+                    <div id="progress-label">Analyzing cover art...</div>
+                    <div class="progress-steps">
+                        <span class="step" id="step-analyze">Analyze</span>
+                        <span class="step" id="step-search">Search MB</span>
+                        <span class="step" id="step-rank">Rank</span>
+                        <span class="step" id="step-done">Done</span>
+                    </div>
                 </div>
             </div>
+
+            <div id="search-results"></div>
+
+            <div id="fallback-search">
+                <div id="fallback-message">Could not auto-identify the album.</div>
+                <p style="color:#aaa; font-size:0.9em;">Enter artist &amp; title to search MusicBrainz:</p>
+                <div class="fallback-row">
+                    <input type="text" id="fb-artist" placeholder="Artist name" />
+                    <input type="text" id="fb-title" placeholder="Album title" />
+                </div>
+                <button id="fb-search-btn">Search MusicBrainz</button>
+                <div class="error" id="fb-error" style="display:none;"></div>
+            </div>
+
+            <div id="metadata-display">
+                <h3>Full Metadata (Ready to Catalog)</h3>
+                <div class="metadata-grid" id="metadata-grid"></div>
+                <div class="form-group">
+                    <label>Additional Notes (optional)</label>
+                    <input type="text" id="notes" placeholder="Collection notes&hellip;" />
+                </div>
+                <div class="form-group">
+                    <label>Condition Grade</label>
+                    <select id="condition">
+                        <option value="NM">Near Mint (NM)</option>
+                        <option value="M">Mint (M)</option>
+                        <option value="EX">Excellent (EX)</option>
+                        <option value="VG">Very Good (VG)</option>
+                        <option value="GD">Good (GD)</option>
+                        <option value="FAIR">Fair</option>
+                        <option value="POOR">Poor</option>
+                    </select>
+                </div>
+                <button id="catalog-btn" disabled>Catalog This Release</button>
+                <button onclick="resetForm()">Another Image</button>
+            </div>
+
+            <div id="catalog-stats" style="display:none;">
+                <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
+            </div>
         </div>
 
-        <!-- Search Results -->
-        <div id="search-results"></div>
-
-        <!-- Fallback Manual Search -->
-        <div id="fallback-search">
-            <div id="fallback-message">Could not auto-identify the album.</div>
-            <p style="color:#aaa; font-size:0.9em;">Enter artist &amp; title to search MusicBrainz:</p>
-            <div class="fallback-row">
-                <input type="text" id="fb-artist" placeholder="Artist name" />
-                <input type="text" id="fb-title" placeholder="Album title" />
+        <!-- ── Catalog Section ── -->
+        <div class="section" id="section-catalog">
+            <div class="catalog-stats-bar" id="catalog-stats-bar">
+                <span class="stat">Albums<div><strong id="cat-count">0</strong></div></span>
+                <span class="stat">Genres<div><strong id="cat-genres">&mdash;</strong></div></span>
+                <span class="stat">Est. Value<div><strong id="cat-value">&mdash;</strong></div></span>
             </div>
-            <button id="fb-search-btn">Search MusicBrainz</button>
-            <div class="error" id="fb-error" style="display:none;"></div>
+
+            <div class="catalog-toolbar">
+                <input type="text" id="cat-search" class="catalog-search-input" placeholder="Filter by artist, title, genre..." />
+                <div class="view-toggle">
+                    <button id="view-grid" class="active">&#x25A6; Grid</button>
+                    <button id="view-list">&#x2630; List</button>
+                </div>
+            </div>
+
+            <div id="catalog-albums"></div>
         </div>
 
-        <!-- Metadata / Catalog Form -->
-        <div id="metadata-display">
-            <h3>Full Metadata (Ready to Catalog)</h3>
-            <div class="metadata-grid" id="metadata-grid"></div>
-
-            <div class="form-group">
-                <label>Additional Notes (optional)</label>
-                <input type="text" id="notes" placeholder="Collection notes&hellip;" />
+        <!-- Detail Modal -->
+        <div class="modal-overlay" id="detail-modal">
+            <div class="modal">
+                <button class="modal-close" onclick="closeDetail()">&times;</button>
+                <div id="detail-content"></div>
             </div>
-            <div class="form-group">
-                <label>Condition Grade</label>
-                <select id="condition">
-                    <option value="NM">Near Mint (NM)</option>
-                    <option value="M">Mint (M)</option>
-                    <option value="EX">Excellent (EX)</option>
-                    <option value="VG">Very Good (VG)</option>
-                    <option value="GD">Good (GD)</option>
-                    <option value="FAIR">Fair</option>
-                    <option value="POOR">Poor</option>
-                </select>
-            </div>
-            <button id="catalog-btn" disabled>Catalog This Release</button>
-            <button onclick="resetForm()">Another Image</button>
-        </div>
-
-        <!-- Stats -->
-        <div id="catalog-stats" style="display:none;">
-            <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
         </div>
     </div>
 
@@ -224,21 +314,49 @@
         let currentFile = null;
         let candidates  = [];
         let selectedMbid = null;
+        let progressTimer = null;
+        let catalogData = [];
+        let currentView = 'grid';
 
+        // ── Tab switching ──
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('section-' + tab.dataset.tab).classList.add('active');
+                if (tab.dataset.tab === 'catalog') loadCatalog();
+            });
+        });
+
+        // ── Search (unchanged) ──
         const dropZone  = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
-
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop',     async e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-        dropZone.addEventListener('click',    () => fileInput.click());
+        dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+        dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
         document.getElementById('fb-search-btn').addEventListener('click', doFallbackSearch);
         document.getElementById('fb-artist').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
         document.getElementById('fb-title').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
+        document.getElementById('catalog-btn').addEventListener('click', doCatalog);
 
-        let progressTimer = null;
+        document.getElementById('cat-search').addEventListener('input', renderCatalog);
+
+        document.getElementById('view-grid').addEventListener('click', () => {
+            currentView = 'grid';
+            document.getElementById('view-grid').classList.add('active');
+            document.getElementById('view-list').classList.remove('active');
+            renderCatalog();
+        });
+        document.getElementById('view-list').addEventListener('click', () => {
+            currentView = 'list';
+            document.getElementById('view-list').classList.add('active');
+            document.getElementById('view-grid').classList.remove('active');
+            renderCatalog();
+        });
 
         function escapeHtml(s) {
             const d = document.createElement('div');
@@ -251,6 +369,23 @@
             return Math.round(v * 100) + '% match';
         }
 
+        function fmtPrice(p) {
+            if (!p) return null;
+            if (p.avg) return '$' + Number(p.avg).toFixed(2);
+            if (p.min && p.max) return '$' + Number(p.min).toFixed(0) + ' – $' + Number(p.max).toFixed(0);
+            return null;
+        }
+
+        function fmtPriceRange(p) {
+            if (!p) return null;
+            const parts = [];
+            if (p.min) parts.push('Min: $' + Number(p.min).toFixed(2));
+            if (p.max) parts.push('Max: $' + Number(p.max).toFixed(2));
+            if (p.avg) parts.push('Avg: $' + Number(p.avg).toFixed(2));
+            return parts.join(' | ');
+        }
+
+        // ── Progress ──
         function startProgress() {
             const fill = document.getElementById('progress-fill');
             const label = document.getElementById('progress-label');
@@ -260,18 +395,9 @@
             document.getElementById('progress-container').style.display = 'block';
             label.textContent = 'Analyzing cover art...';
             document.getElementById(steps[0]).className = 'step active';
-
             if (progressTimer) clearInterval(progressTimer);
-            progressTimer = setTimeout(() => {
-                fill.style.width = '35%';
-                label.textContent = 'Searching MusicBrainz...';
-                document.getElementById(steps[1]).className = 'step active';
-            }, 2000);
-            progressTimer = setTimeout(() => {
-                fill.style.width = '65%';
-                label.textContent = 'Finding best matches...';
-                document.getElementById(steps[2]).className = 'step active';
-            }, 4000);
+            setTimeout(() => { fill.style.width = '35%'; label.textContent = 'Searching MusicBrainz...'; document.getElementById(steps[1]).className = 'step active'; }, 2000);
+            setTimeout(() => { fill.style.width = '65%'; label.textContent = 'Finding best matches...'; document.getElementById(steps[2]).className = 'step active'; }, 4000);
         }
 
         function completeProgress() {
@@ -355,12 +481,8 @@
                 img.src = c.cover_url;
                 row.innerHTML = '';
                 row.appendChild(img);
-                const badge = c.from_index
-                    ? `<span class="index-badge">From your collection</span>`
-                    : '';
-                const pct = c.similarity
-                    ? `<span class="match-pct">${fmtPct(c.similarity)}</span>`
-                    : '';
+                const badge = c.from_index ? `<span class="index-badge">From your collection</span>` : '';
+                const pct = c.similarity ? `<span class="match-pct">${fmtPct(c.similarity)}</span>` : '';
                 row.innerHTML += `
                     <div class="candidate-info">
                         <div class="candidate-artist">${escapeHtml(c.artist)}${badge}</div>
@@ -424,7 +546,7 @@
             }
         }
 
-        document.getElementById('catalog-btn').addEventListener('click', async () => {
+        async function doCatalog() {
             if (!selectedMbid || !currentFile) return;
             const sel = candidates.find(c => c.mbid === selectedMbid);
             if (!sel) return;
@@ -448,7 +570,7 @@
             } catch(err) {
                 alert(err.message);
             }
-        });
+        }
 
         function resetForm() {
             currentFile = null;
@@ -466,6 +588,165 @@
             document.getElementById('condition').value = 'NM';
             if (progressTimer) clearInterval(progressTimer);
         }
+
+        // ── Catalog View ──
+
+        async function loadCatalog() {
+            try {
+                const r = await fetch(API + 'catalog');
+                if (!r.ok) throw new Error('Failed to load catalog');
+                const data = await r.json();
+                catalogData = data.albums || [];
+                updateStats();
+                renderCatalog();
+            } catch(err) {
+                document.getElementById('catalog-albums').innerHTML =
+                    `<div class="error">${escapeHtml(err.message)}</div>`;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('cat-count').textContent = catalogData.length;
+            const allGenres = new Set();
+            let totalValue = 0;
+            catalogData.forEach(a => {
+                (a.genre || []).forEach(g => allGenres.add(g));
+                if (a.price_range && a.price_range.avg) totalValue += Number(a.price_range.avg);
+            });
+            document.getElementById('cat-genres').textContent = allGenres.size || '\u2014';
+            document.getElementById('cat-value').textContent =
+                totalValue > 0 ? '$' + totalValue.toFixed(0) : '\u2014';
+        }
+
+        function renderCatalog() {
+            const container = document.getElementById('catalog-albums');
+            const filter = document.getElementById('cat-search').value.toLowerCase().trim();
+
+            let filtered = catalogData;
+            if (filter) {
+                filtered = catalogData.filter(a =>
+                    (a.artist || '').toLowerCase().includes(filter) ||
+                    (a.title || '').toLowerCase().includes(filter) ||
+                    (a.label || '').toLowerCase().includes(filter) ||
+                    (a.genre || []).some(g => g.toLowerCase().includes(filter)) ||
+                    (a.year || '').includes(filter)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="cat-empty">
+                        ${catalogData.length === 0
+                            ? '<strong>No albums cataloged yet</strong><p>Drop a cover on the Search tab to get started.</p>'
+                            : '<strong>No matches</strong><p>Try a different filter.</p>'}
+                    </div>`;
+                return;
+            }
+
+            if (currentView === 'grid') {
+                let html = '<div class="catalog-grid">';
+                filtered.forEach(a => {
+                    const price = fmtPrice(a.price_range);
+                    html += `
+                        <div class="grid-card" onclick="showDetail('${escapeHtml(a.mbid)}')">
+                            <img src="${escapeHtml(a.cover_url || '')}" alt="${escapeHtml(a.title)}" onerror="this.style.display='none'" />
+                            <div class="body">
+                                <div class="artist">${escapeHtml(a.artist)}</div>
+                                <div class="title">${escapeHtml(a.title)}</div>
+                                ${price ? `<div class="price">${escapeHtml(price)}</div>` : ''}
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                let html = '<div class="catalog-list">';
+                filtered.forEach(a => {
+                    const price = fmtPrice(a.price_range);
+                    const priceRange = fmtPriceRange(a.price_range);
+                    const tags = a.tags || a.genre || [];
+                    const info = a.info || '';
+                    html += `
+                        <div class="list-item" onclick="showDetail('${escapeHtml(a.mbid)}')">
+                            <img src="${escapeHtml(a.cover_url || '')}" alt="${escapeHtml(a.title)}" onerror="this.style.display='none'" />
+                            <div class="body">
+                                <div>
+                                    <div class="artist">${escapeHtml(a.artist)}</div>
+                                    <div class="title">${escapeHtml(a.title)}</div>
+                                    <div class="meta">
+                                        ${escapeHtml(a.year || '')}
+                                        ${a.label ? '&middot; ' + escapeHtml(a.label) : ''}
+                                        ${a.format ? '&middot; ' + escapeHtml(a.format) : ''}
+                                        ${a.country ? '&middot; ' + escapeHtml(a.country) : ''}
+                                    </div>
+                                    ${tags.length ? '<div class="tags">' +
+                                        tags.slice(0, 8).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('') +
+                                    '</div>' : ''}
+                                    ${info ? `<div class="info-text">${escapeHtml(info)}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="price-col">
+                                ${price ? `<div class="amt">${escapeHtml(price)}</div>` : ''}
+                                <div class="lbl">${priceRange ? escapeHtml(priceRange) : (a.condition || '')}</div>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        }
+
+        function showDetail(mbid) {
+            const album = catalogData.find(a => a.mbid === mbid);
+            if (!album) return;
+            const price = fmtPrice(album.price_range);
+            const priceRange = fmtPriceRange(album.price_range);
+            const tags = album.tags || album.genre || [];
+            const coverSrc = album.cover_url || (album.image ? API + 'images/' + album.image : '');
+            const discogsLink = album.discogs_url
+                ? `<a href="${escapeHtml(album.discogs_url)}" target="_blank" rel="noopener">View on Discogs &rarr;</a>`
+                : '';
+
+            let html = `
+                <img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(album.title)}" onerror="this.style.display='none'" />
+                <h2>${escapeHtml(album.title)}</h2>
+                <div class="sub">${escapeHtml(album.artist)}${album.year ? ' &middot; ' + escapeHtml(album.year) : ''}</div>
+                <div class="dgrid">
+                    ${album.label ? `<div class="ditem"><div class="lbl">Label</div><div class="val">${escapeHtml(album.label)}</div></div>` : ''}
+                    ${album.format ? `<div class="ditem"><div class="lbl">Format</div><div class="val">${escapeHtml(album.format)}</div></div>` : ''}
+                    ${album.condition ? `<div class="ditem"><div class="lbl">Condition</div><div class="val">${escapeHtml(album.condition)}</div></div>` : ''}
+                    ${album.country ? `<div class="ditem"><div class="lbl">Country</div><div class="val">${escapeHtml(album.country)}</div></div>` : ''}
+                    ${album.catalog_number ? `<div class="ditem"><div class="lbl">Cat. No.</div><div class="val">${escapeHtml(album.catalog_number)}</div></div>` : ''}
+                    ${album.catalog_number ? '' : ''}
+                </div>
+                ${(album.genre || []).length ? '<div class="tags">' +
+                    (album.genre || []).map(g => `<span class="tag">${escapeHtml(String(g))}</span>`).join('') +
+                '</div>' : ''}
+                ${tags.length ? '<div class="tags" style="margin-top:4px;">' +
+                    tags.slice(0, 10).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('') +
+                '</div>' : ''}
+                ${album.info ? `<div class="info-block"><div class="lbl">About this album</div>${escapeHtml(album.info)}</div>` : ''}
+                ${price ? `<div class="price-block"><div class="amt">${escapeHtml(price)}</div><div class="lbl">Estimated Value</div>${priceRange ? `<div class="range">${escapeHtml(priceRange)}</div>` : ''}</div>` : ''}
+                <div style="text-align:center;margin-top:14px;font-size:0.85em;">
+                    ${discogsLink}
+                    ${album.mbid ? `<span style="color:#64748b;margin:0 8px;">&middot;</span>MBID: ${escapeHtml(album.mbid.slice(0,8))}...` : ''}
+                </div>
+            `;
+
+            document.getElementById('detail-content').innerHTML = html;
+            document.getElementById('detail-modal').classList.add('open');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-modal').classList.remove('open');
+        }
+
+        document.getElementById('detail-modal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeDetail();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeDetail();
+        });
     </script>
 </body>
 </html>
