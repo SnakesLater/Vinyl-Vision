@@ -4,6 +4,13 @@ LM_STUDIO_URL = "http://localhost:1234/v1/chat/completions"
 _MODEL = "qwen/qwen3.5-9b"
 _TIMEOUT = 120
 
+def _detect_mime(header: bytes) -> str:
+    if header[:4] == b"\x89PNG":
+        return "image/png"
+    if header[:4] in (b"RIFF",):
+        return "image/webp"
+    return "image/jpeg"
+
 PROMPT = (
     'Look at this album cover. Respond ONLY with valid JSON: '
     '{"artist": "...", "title": "...", "year": ..., "label": "...", '
@@ -15,12 +22,13 @@ PROMPT = (
 
 async def analyze_cover(image_bytes: bytes) -> dict | None:
     b64 = base64.b64encode(image_bytes).decode("utf-8")
+    mime = _detect_mime(image_bytes[:4])
     payload = {
         "model": _MODEL,
         "messages": [{
             "role": "user",
             "content": [
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
                 {"type": "text", "text": PROMPT},
             ],
         }],

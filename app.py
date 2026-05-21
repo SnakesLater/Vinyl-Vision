@@ -95,7 +95,7 @@ def mb_hits_to_candidates(hits: list[dict], has_cover: set | None = None) -> lis
 class DiscogsClient:
     def __init__(self, token: str):
         self.token = token
-        self.h = {"Authorization": f"Bearer {token}", "User-Agent": "RecordCatalog/1.0"}
+        self.h = {"Authorization": f"Bearer {token}", "User-Agent": "Vinyl-Vision/1.0"}
 
     async def _get(self, path: str, **kw) -> dict:
         async with httpx.AsyncClient(timeout=30) as c:
@@ -134,6 +134,8 @@ class DiscogsClient:
             return []
 
 discogs = DiscogsClient(DISCOGS_TOKEN)
+if not DISCOGS_TOKEN:
+    print("[app] WARNING: DISCOGS_TOKEN not set — Discogs enrichment will be skipped", flush=True)
 
 # ── Catalog ────────────────────────────────────────────────────────────────────
 class Catalog:
@@ -251,32 +253,6 @@ async def search_text(artist: str = Form(...), title: str = Form(...)):
         ranked = await image_match.rank_candidates(_last_search_embedding, candidates)
         return {"candidates": ranked}
     return {"candidates": candidates}
-
-@app.get("/api/album/{album_id}.json")
-async def album(album_id: int):
-    dr   = await discogs.release(album_id)
-    if not dr:
-        raise HTTPException(404, "Not found")
-    prices, tags = await asyncio.gather(discogs.prices(album_id), discogs.tags(album_id))
-    pr      = prices.get("price_range", {}) if not isinstance(prices, Exception) else {}
-    t_list  = tags   if not isinstance(tags,   Exception) else []
-    return {
-        "id":           dr.get("id"),
-        "title":        dr.get("title"),
-        "artist":       dr.get("artists", [{}])[0],
-        "year":         dr.get("year"),
-        "format":       dr.get("formats"),
-        "genre":        [g.get("name") for g in dr.get("genres", [])],
-        "label":        dr.get("label"),
-        "barcode":      dr.get("barcode"),
-        "release_date": dr.get("released"),
-        "country":      dr.get("country"),
-        "images":       dr.get("images", []),
-        "price_summary": pr,
-        "tags":         t_list,
-        "catalog_number": dr.get("catalog_number"),
-        "discogs_url":  f"https://www.discogs.com/release/{album_id}",
-    }
 
 # ── Catalog an album ───────────────────────────────────────────────────────────
 @app.post("/upload")
