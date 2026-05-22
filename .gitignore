@@ -3,10 +3,6 @@ __pycache__/
 *.pyc
 .env
 .env.local
-catalog/catalog.json
-catalog/covers_index.json
-images/*.jpg
-images/*.png
 .DS_Store
 .pytest_cache/
 tests/__pycache__/
