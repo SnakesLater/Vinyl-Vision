@@ -2,7 +2,7 @@ import json, base64, httpx, re
 
 LM_STUDIO_URL = "http://localhost:1234/v1/chat/completions"
 _MODEL = "qwen/qwen3.5-9b"
-_TIMEOUT = 120
+_TIMEOUT = 300
 
 def _detect_mime(header: bytes) -> str:
     if header[:4] == b"\x89PNG":
@@ -12,12 +12,19 @@ def _detect_mime(header: bytes) -> str:
     return "image/jpeg"
 
 PROMPT = (
-    'Look at this album cover. Respond ONLY with valid JSON: '
-    '{"artist": "...", "title": "...", "year": ..., "label": "...", '
-    '"genre": ["..."], '
-    '"info": "A fun short paragraph about this album - notable tracks, '
-    'what was happening with the artist at the time, and interesting bits '
-    'about its place in music history."}'
+    'Identify this album cover. Extract the EXACT artist name and EXACT album title '
+    'if readable on the cover art. If there is no text, identify by visual style, '
+    'era, and genre cues instead.\n\n'
+    'Be aware of edge cases:\n'
+    '- Multiple artists / "feat." / various artists — put the main artist in "artist"\n'
+    '- Compilations, EPs, singles, live albums, soundtracks — note the type\n'
+    '- If unsure about any field, set confidence to "low"\n\n'
+    'Respond ONLY with valid JSON — no markdown, no backticks, no extra text:\n'
+    '{"artist": "Artist Name", "title": "Album Title", '
+    '"year": 1975, "label": "Record Label", '
+    '"genre": ["Rock", "Pop"], '
+    '"type": "album", "confidence": "high", '
+    '"info": "A short interesting paragraph about this album"}'
 )
 
 async def analyze_cover(image_bytes: bytes) -> dict | None:
@@ -33,7 +40,7 @@ async def analyze_cover(image_bytes: bytes) -> dict | None:
             ],
         }],
         "temperature": 0.1,
-        "max_tokens": 4096,
+        "max_tokens": 1024,
     }
     try:
         async with httpx.AsyncClient(timeout=_TIMEOUT) as c:
@@ -48,10 +55,4 @@ async def analyze_cover(image_bytes: bytes) -> dict | None:
         print(f"[lm_studio] error: {e}", flush=True)
         return None
 
-async def check_server() -> bool:
-    try:
-        async with httpx.AsyncClient(timeout=3) as c:
-            r = await c.get("http://localhost:1234/v1/models")
-            return r.status_code == 200
-    except:
-        return False
+

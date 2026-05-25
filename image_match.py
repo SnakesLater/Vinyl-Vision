@@ -78,7 +78,7 @@ async def rank_candidates(dropped_embedding: list[float], candidates: list[dict]
 
     async def _score(c: dict) -> dict:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
                 r = await client.get(c["cover_url"])
                 if r.status_code == 200:
                     img = Image.open(io.BytesIO(r.content)).convert("RGB")

@@ -44,6 +44,8 @@
         #progress-container { display: none; margin-bottom: 25px; }
         #progress-track { background: #334155; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
         #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #4a90d9, #66a3ff); transition: width 0.4s ease; border-radius: 8px; }
+        #progress-fill.pulsing { animation: pulse 1.8s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         #progress-label { text-align: center; color: #94a3b8; font-size: 0.9em; margin-bottom: 4px; }
         .progress-steps { display: flex; justify-content: space-between; font-size: 0.75em; color: #475569; }
         .progress-steps .step.active { color: #66a3ff; font-weight: 600; }
@@ -90,6 +92,7 @@
         button:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .error { background: rgba(239,68,68,0.2); border-left: 4px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        .warning { background: rgba(250,204,21,0.15); border-left: 4px solid #eab308; color: #fde68a; padding: 12px 15px; border-radius: 6px; margin: 10px 0; font-size: 0.9em; }
         .success { background: rgba(74,144,217,0.2); border-left: 4px solid #4a90d9; padding: 15px; border-radius: 6px; margin: 10px 0; }
 
         #fallback-search { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
@@ -223,7 +226,7 @@
             <div id="drop-zone">
                 <p><strong>Drag & drop an album cover image here</strong></p>
                 <p class="hint">or click to browse</p>
-                <input type="file" id="file-input" accept="image/*" style="display: none;" />
+                <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;" />
             </div>
 
             <div id="preview-container">
@@ -391,13 +394,19 @@
             const label = document.getElementById('progress-label');
             const steps = ['step-analyze', 'step-search', 'step-rank', 'step-done'];
             fill.style.width = '0%';
+            fill.classList.remove('pulsing');
             steps.forEach(id => document.getElementById(id).className = 'step');
             document.getElementById('progress-container').style.display = 'block';
             label.textContent = 'Analyzing cover art...';
             document.getElementById(steps[0]).className = 'step active';
             if (progressTimer) clearInterval(progressTimer);
-            setTimeout(() => { fill.style.width = '35%'; label.textContent = 'Searching MusicBrainz...'; document.getElementById(steps[1]).className = 'step active'; }, 2000);
-            setTimeout(() => { fill.style.width = '65%'; label.textContent = 'Finding best matches...'; document.getElementById(steps[2]).className = 'step active'; }, 4000);
+            // After 4s with no response, show we're waiting on AI
+            progressTimer = setTimeout(() => {
+                fill.style.width = '30%';
+                fill.classList.add('pulsing');
+                label.textContent = 'Waiting on AI analysis...';
+                document.getElementById(steps[1]).className = 'step active';
+            }, 4000);
         }
 
         function completeProgress() {
@@ -405,6 +414,7 @@
             const label = document.getElementById('progress-label');
             const steps = ['step-analyze', 'step-search', 'step-rank', 'step-done'];
             fill.style.width = '100%';
+            fill.classList.remove('pulsing');
             label.textContent = 'Done!';
             steps.forEach(id => document.getElementById(id).className = 'step done');
             if (progressTimer) clearInterval(progressTimer);
@@ -450,8 +460,25 @@
             }
             if (data.fallback && (!data.candidates || data.candidates.length === 0)) {
                 document.getElementById('fallback-search').style.display = 'block';
+                if (data.qwen_artist) document.getElementById('fb-artist').value = data.qwen_artist;
+                if (data.qwen_title) document.getElementById('fb-title').value = data.qwen_title;
                 document.getElementById('fb-artist').focus();
                 return;
+            }
+            const resDiv = document.getElementById('search-results');
+            if (data.warning) {
+                let warnEl = document.getElementById('confidence-warning');
+                if (!warnEl) {
+                    warnEl = document.createElement('div');
+                    warnEl.id = 'confidence-warning';
+                    warnEl.className = 'warning';
+                    resDiv.parentNode.insertBefore(warnEl, resDiv);
+                }
+                warnEl.textContent = data.warning;
+                warnEl.style.display = 'block';
+            } else {
+                const warnEl = document.getElementById('confidence-warning');
+                if (warnEl) warnEl.style.display = 'none';
             }
             showCandidates(data.candidates || []);
         }

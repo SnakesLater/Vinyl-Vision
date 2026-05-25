@@ -1,11 +1,12 @@
-import os, json, io, httpx, asyncio
+import os, json, io, httpx, asyncio, datetime
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from PIL import Image
 
 import image_match
-from lm_studio import analyze_cover, check_server
+from lm_studio import analyze_cover
 
 BASE_DIR    = Path(__file__).parent
 IMAGES_DIR  = BASE_DIR / "images"
@@ -14,10 +15,21 @@ IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 CATALOG_DIR.mkdir(parents=True, exist_ok=True)
 
 DISCOGS_TOKEN = os.getenv("DISCOGS_TOKEN") or ""
+HF_TOKEN  = os.getenv("HF_TOKEN") or ""
 MB_UA     = "Vinyl-Vision/1.0 (github.com/SnakesLater/Vinyl-Vision)"
 PORT      = int(os.getenv("PORT", 8081))
 
 app = FastAPI(title="Record Catalog API v0.1")
+
+# Authenticate with HuggingFace so CLIP downloads aren't rate-limited
+if HF_TOKEN:
+    os.environ["HF_TOKEN"] = HF_TOKEN
+    # Trigger login for cached token
+    try:
+        from huggingface_hub import login
+        login(token=HF_TOKEN, add_to_git_credential=False)
+    except Exception:
+        pass  # non-critical; downloads still work anonymously
 
 # Stores the last dropped image's CLIP embedding so search-text
 # can use it for visual ranking if the user overrides manually.
@@ -51,6 +63,18 @@ async def mb_search_by_text(artist: str, title: str, year: str = "") -> list[dic
             r.raise_for_status()
             hits = r.json().get("releases", [])
             print(f"[search-text] MB returned {len(hits)} hits", flush=True)
+            if not hits:
+                # Fuzzy fallback: general query catches misspellings
+                fuzzy_q = f'{safe_a} {safe_t}'
+                print(f"[search-text] strict miss, trying fuzzy: '{fuzzy_q}'", flush=True)
+                r2 = await c.get(
+                    "https://musicbrainz.org/ws/2/release",
+                    params={"query": fuzzy_q, "fmt": "json", "limit": 10},
+                    headers={"User-Agent": MB_UA},
+                )
+                r2.raise_for_status()
+                hits = r2.json().get("releases", [])
+                print(f"[search-text] fuzzy returned {len(hits)} hits", flush=True)
             return hits
     except Exception as e:
         print(f"[search-text] MB error: {e}", flush=True)
@@ -177,6 +201,21 @@ async def search(image: UploadFile = File(...)):
         raise HTTPException(400, "No image file provided")
     print(f"[search] received {len(img_bytes)} bytes", flush=True)
 
+    # Resize large images to speed up LM Studio processing
+    if len(img_bytes) > 500_000:
+        try:
+            img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            w, h = img.size
+            if w > 1024 or h > 1024:
+                ratio = 1024 / max(w, h)
+                img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=95)
+                img_bytes = buf.getvalue()
+                print(f"[search] resized image: {w}x{h} → {img.size[0]}x{img.size[1]} ({len(img_bytes)} bytes)", flush=True)
+        except Exception as e:
+            print(f"[search] resize failed (using original): {e}", flush=True)
+
     embedding = image_match.compute_embedding(img_bytes)
     _last_search_embedding = embedding
 
@@ -190,18 +229,28 @@ async def search(image: UploadFile = File(...)):
             "from_index": True,
         }
 
-    # Tier 2: LM Studio vision model
-    if not await check_server():
-        print("[search] LM Studio not reachable", flush=True)
-        return {"candidates": [], "fallback": True,
-                "message": "Image analysis server (LM Studio) is not running. Start it on port 1234, or search manually below."}
-
+    # Tier 2: LM Studio vision model (waits up to 300s for Qwen to respond)
     result = await analyze_cover(img_bytes)
     _last_qwen_result = result
     if not result:
-        print("[search] LM Studio returned no result", flush=True)
-        return {"candidates": [], "fallback": True,
-                "message": "Could not identify the album from this image. Try a clearer photo or search manually."}
+        # Differentiate between "server not running" and "Qwen couldn't identify"
+        reachable = False
+        try:
+            async with httpx.AsyncClient(timeout=3) as c:
+                r = await c.get("http://localhost:1234/v1/models")
+                reachable = r.status_code == 200
+        except Exception:
+            pass
+        if not reachable:
+            msg = "Image analysis server (LM Studio) is not running. Start it on port 1234, or search manually below."
+        else:
+            msg = "Could not identify the album from this image. Try a clearer photo or search manually."
+        print(f"[search] LM Studio returned no result (reachable={reachable})", flush=True)
+        return {"candidates": [], "fallback": True, "message": msg}
+
+    confidence = result.get("confidence", "high")
+    if confidence not in ("high", "medium", "low"):
+        confidence = "high"
 
     artist = result.get("artist", "").strip()
     title  = result.get("title", "").strip()
@@ -216,7 +265,8 @@ async def search(image: UploadFile = File(...)):
     mb_hits = await mb_search_by_text(artist, title)
     if not mb_hits:
         return {"candidates": [], "fallback": True,
-                "message": f"Found '{artist} - {title}' in the image, but no matches in MusicBrainz."}
+                "qwen_artist": artist, "qwen_title": title,
+                "message": f"Qwen suggested '{artist} - {title}', but no matches in MusicBrainz. Correct the name and try again."}
 
     # CAA cover check
     checks = await asyncio.gather(*[check_caa_cover(h["id"]) for h in mb_hits[:5]])
@@ -229,7 +279,11 @@ async def search(image: UploadFile = File(...)):
     # CLIP visual ranking
     ranked = await image_match.rank_candidates(embedding, candidates)
     print(f"[search] returning {len(ranked)} ranked candidates", flush=True)
-    return {"candidates": ranked, "fallback": False}
+    resp = {"candidates": ranked, "fallback": False}
+    if confidence == "low":
+        resp["warning"] = "Low confidence — please verify this identification before cataloging."
+        print("[search] confidence is low — added warning", flush=True)
+    return resp
 
 # ── Manual text search (fallback / override) ────────────────────────────────────
 @app.post("/search-text")
@@ -283,7 +337,7 @@ async def upload(
         "notes":       notes,
         "image":       safe_name,
         "cover_url":   cover_url,
-        "uploaded_at": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+        "uploaded_at": datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z"),
     }
 
     if mbid:
