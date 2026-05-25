@@ -92,6 +92,7 @@
         }
         button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,144,217,0.4); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .batch-mode-btn { width: 100%; margin: 8px 0; padding: 20px; font-size: 1.1em; border-radius: 10px; text-align: center; line-height: 1.5; }
 
         .error { background: rgba(239,68,68,0.2); border-left: 4px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 6px; margin: 10px 0; }
         .warning { background: rgba(250,204,21,0.15); border-left: 4px solid #eab308; color: #fde68a; padding: 12px 15px; border-radius: 6px; margin: 10px 0; font-size: 0.9em; }
@@ -267,23 +268,51 @@
             <div class="modal-overlay" id="detail-modal">
                 <!-- Batch Upload Mode -->
                 <div class="modal-content batch-modal-content" id="batch-modal-content">
-                    <h3>📂 Batch Upload Photos</h3>
-                    <p>Select 5-10 photos to process as a batch</p>
-                    <input type="file" id="batch-files" multiple accept="image/*" style="width:100%;margin-top:15px;">
-
-                    <div id="batch-progress" style="display:none;margin:20px 0;">
-                        <div id="progress-track">
-                            <div id="progress-fill" style="width:0%"></div>
-                        </div>
-                        <div class="progress-steps">
-                            <span class="step active" id="batch-step-1">Selecting files</span>
-                            <span class="step done" id="batch-step-2">Processing...</span>
-                            <span class="step" id="batch-step-3">Review results</span>
-                        </div>
-                        <p style="text-align:center;margin-top:10px;"><strong id="batch-progress-text">Ready</strong></p>
+                    <div id="batch-mode-select">
+                        <h3>📂 Batch Upload</h3>
+                        <p style="color:#64748b;margin-bottom:20px;">Choose a mode:</p>
+                        <button onclick="showMultiFileMode()" class="batch-mode-btn" style="background:linear-gradient(135deg,#4a90d9,#357abd);">
+                            📸 Multiple photos<br><small style="font-weight:normal;">Upload 5-10 individual album photos</small>
+                        </button>
+                        <button onclick="showSinglePhotoMode()" class="batch-mode-btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">
+                            🖼️ One photo, many albums<br><small style="font-weight:normal;">Take a group photo of multiple albums</small>
+                        </button>
+                        <button onclick="closeDetail()" style="margin-top:15px;background:#334155;">Cancel</button>
                     </div>
 
-                    <button onclick="processBatch()" id="batch-start-btn" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:15px;padding:12px 30px;font-size:16px;">🚀 Process Batch</button>
+                    <div id="batch-multi-file" style="display:none;">
+                        <h3>📸 Upload Multiple Photos</h3>
+                        <p>Select 5-10 photos to process as a batch</p>
+                        <input type="file" id="batch-files" multiple accept="image/*" style="width:100%;margin-top:15px;">
+
+                        <div id="batch-progress" style="display:none;margin:20px 0;">
+                            <div id="progress-track">
+                                <div id="progress-fill" style="width:0%"></div>
+                            </div>
+                            <div class="progress-steps">
+                                <span class="step active" id="batch-step-1">Selecting files</span>
+                                <span class="step done" id="batch-step-2">Processing...</span>
+                                <span class="step" id="batch-step-3">Review results</span>
+                            </div>
+                            <p style="text-align:center;margin-top:10px;"><strong id="batch-progress-text">Ready</strong></p>
+                        </div>
+
+                        <button onclick="processBatch()" id="batch-start-btn" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:15px;padding:12px 30px;font-size:16px;">🚀 Process Batch</button>
+                        <button onclick="showBatchModeSelect()" style="background:#334155;margin-top:10px;">← Back</button>
+                    </div>
+
+                    <div id="batch-single-photo" style="display:none;">
+                        <h3>🖼️ One Photo, Many Albums</h3>
+                        <p>Take or select a photo showing multiple albums. Qwen AI will identify each one.</p>
+                        <input type="file" id="multi-photo-file" accept="image/*" capture="environment" style="width:100%;margin-top:15px;">
+
+                        <div id="single-progress" style="display:none;margin:20px 0;">
+                            <p style="text-align:center;"><strong id="single-progress-text">Analyzing photo...</strong></p>
+                        </div>
+
+                        <button onclick="processMultiPhoto()" id="single-start-btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed);margin-top:15px;padding:12px 30px;font-size:16px;">🔍 Find Albums</button>
+                        <button onclick="showBatchModeSelect()" style="background:#334155;margin-top:10px;">← Back</button>
+                    </div>
 
                     <!-- Detail Mode (shown after selection) -->
                     <div class="modal-content detail-modal-content" id="detail-modal-content">
@@ -873,15 +902,39 @@
         // ── Batch Upload Modal ──
         let batchFiles = [];
         let batchResults = [];
+        let batchMode = ''; // 'multi-file' or 'single-photo'
+        let lastMultiPhotoFile = null;
+
+        function showBatchModeSelect() {
+            document.getElementById('batch-mode-select').style.display = 'block';
+            document.getElementById('batch-multi-file').style.display = 'none';
+            document.getElementById('batch-single-photo').style.display = 'none';
+        }
+
+        function showMultiFileMode() {
+            batchMode = 'multi-file';
+            document.getElementById('batch-mode-select').style.display = 'none';
+            document.getElementById('batch-multi-file').style.display = 'block';
+            document.getElementById('batch-single-photo').style.display = 'none';
+        }
+
+        function showSinglePhotoMode() {
+            batchMode = 'single-photo';
+            document.getElementById('batch-mode-select').style.display = 'none';
+            document.getElementById('batch-multi-file').style.display = 'none';
+            document.getElementById('batch-single-photo').style.display = 'block';
+        }
 
         function toggleBatchModal() {
             const modal = document.getElementById('detail-modal');
-            // Hide content, show batch overlay if needed
             document.getElementById('batch-files').value = '';
+            document.getElementById('multi-photo-file').value = '';
             batchResults = [];
+            lastMultiPhotoFile = null;
             modal.style.display = 'none';
             setTimeout(() => {
                 modal.style.display = 'flex';
+                showBatchModeSelect();
             }, 10);
         }
 
@@ -893,8 +946,8 @@
             }
 
             const content = document.getElementById('detail-modal');
-            content.innerHTML = ''; // Clear existing content
-            
+            content.innerHTML = '';
+
             const progressDiv = document.createElement('div');
             progressDiv.id = 'batch-progress';
             progressDiv.style.cssText = 'display:block;margin:20px 0;text-align:center;';
@@ -912,7 +965,6 @@
             `;
             content.appendChild(progressDiv);
 
-            let processed = 0;
             let successCount = 0;
 
             for (let i = 0; i < batchFiles.length; i++) {
@@ -930,7 +982,8 @@
                     batchResults.push({
                         filename: batchFiles[i].name,
                         result: data,
-                        status: 'processed'
+                        status: 'processed',
+                        imageFile: batchFiles[i],
                     });
                 } catch (err) {
                     batchResults.push({
@@ -940,29 +993,107 @@
                     });
                 }
 
-                processed++;
                 const fill = progressDiv.querySelector('#progress-fill');
                 if (fill) fill.style.width = ((i + 1) / batchFiles.length * 100) + '%';
                 await new Promise(r => setTimeout(r, 50));
             }
 
-            // Show results after processing
             showBatchResults();
+        }
+
+        async function processMultiPhoto() {
+            const fileInput = document.getElementById('multi-photo-file');
+            const file = fileInput.files[0];
+            if (!file) { alert('Please select a photo'); return; }
+
+            lastMultiPhotoFile = file;
+
+            const content = document.getElementById('detail-modal');
+            content.innerHTML = '';
+
+            const progressDiv = document.createElement('div');
+            progressDiv.style.cssText = 'text-align:center;margin:40px 20px;';
+            progressDiv.innerHTML = `
+                <p style="margin-bottom:20px;"><strong>🔍 Analyzing photo for albums...</strong></p>
+                <p style="color:#64748b;font-size:0.9em;">Qwen AI is scanning the image. This may take 20-60 seconds.</p>
+            `;
+            content.appendChild(progressDiv);
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await fetch('/batch/multi-photo', { method: 'POST', body: formData });
+                if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
+                const data = await res.json();
+
+                batchResults = [];
+                (data.results || []).forEach(r => {
+                    batchResults.push({
+                        status: 'processed',
+                        filename: r.artist + ' - ' + r.title,
+                        result: { qwen_meta: { artist: r.artist, title: r.title }, candidates: r.cover_url ? [{ artist: r.artist, title: r.title, cover_url: r.cover_url, mbid: r.mbid, similarity: 1 }] : [] },
+                        imageFile: file,
+                        index: r.index,
+                    });
+                });
+
+                showBatchResults();
+
+            } catch (err) {
+                content.innerHTML = `
+                    <div style="text-align:center;margin:40px 20px;">
+                        <p class="error">${escapeHtml(err.message)}</p>
+                        <button onclick="showBatchModeSelect()" style="margin-top:20px;background:#334155;">← Try Again</button>
+                    </div>
+                `;
+            }
         }
 
         function showBatchResults() {
             const content = document.getElementById('detail-modal');
+            const successCount = batchResults.filter(r => r.status === 'processed' && r.result.candidates && r.result.candidates.length > 0).length;
             content.innerHTML = `
                 <div style="background:#1a1a2e;padding:30px 20px;border-radius:12px;text-align:center;">
-                    <h2>📊 Batch Processing Complete</h2>
-                    <p><strong>Total:</strong> ${batchFiles.length} file(s)</p>
-                    <p style="color:#4ade80;"><strong>Success:</strong> ${successCount} album(s) identified</p>
-                    <p style="color:#ef4444;margin:10px 0;"><strong>Failed:</strong> ${batchFiles.length - successCount}</p>
+                    <h2>📊 ${batchMode === 'single-photo' ? 'Albums Found' : 'Batch Processing Complete'}</h2>
+                    <p><strong>Identified:</strong> ${successCount} album(s)</p>
+                    <p style="color:#ef4444;margin:10px 0;"><strong>Failed:</strong> ${batchResults.length - successCount}</p>
                     <div style="margin-top:20px;">
-                        <button onclick="showBatchGrid()" style="background:#4a90d9;padding:12px 30px;font-size:16px;cursor:pointer;">🔍 View All Results</button>
+                        <button onclick="showBatchGrid()" style="background:#4a90d9;padding:12px 30px;font-size:16px;cursor:pointer;">🔍 ${batchMode === 'single-photo' ? 'View Albums' : 'View All Results'}</button>
                     </div>
                 </div>
             `;
+        }
+
+        async function catalogFromBatch(item) {
+            if (!item.imageFile) { alert('No image available for cataloging'); return; }
+
+            const result = item.result;
+            const meta = result.qwen_meta || {};
+            const best = (result.candidates || [])[0] || {};
+
+            const formData = new FormData();
+            formData.append('image', item.imageFile);
+            formData.append('artist', meta.artist || best.artist || '');
+            formData.append('title', meta.title || best.title || '');
+            formData.append('mbid', best.mbid || '');
+            formData.append('cover_url', best.cover_url || '');
+            formData.append('condition', 'NM');
+            formData.append('notes', '');
+            formData.append('year', meta.year || '');
+            formData.append('label', meta.label || '');
+            formData.append('genre', Array.isArray(meta.genre) ? meta.genre.join(', ') : (meta.genre || ''));
+            formData.append('info', meta.info || '');
+            formData.append('discogs_id', String(meta.discogs_id || ''));
+            formData.append('price_estimate', meta.price_estimate || '');
+
+            try {
+                const r = await fetch(API + 'upload', { method: 'POST', body: formData });
+                if (!r.ok) { const e = await r.json(); throw new Error(e.detail || r.statusText); }
+                alert(`✅ Cataloged: ${meta.artist || best.artist} - ${meta.title || best.title}`);
+                loadCatalog();
+            } catch (err) {
+                alert(err.message);
+            }
         }
 
         function showBatchGrid() {
@@ -970,32 +1101,35 @@
             const summaryDiv = content.querySelector('[style*="background:#1a1a2e"]');
             if (summaryDiv) summaryDiv.style.display = 'none';
 
-            content.innerHTML = '<h3 style="margin-bottom:15px;">📂 Batch Processing Results</h3>';
+            content.innerHTML = `<h3 style="margin-bottom:15px;">${batchMode === 'single-photo' ? '🖼️ Albums Found in Photo' : '📂 Batch Processing Results'}</h3>
+                <button onclick="toggleBatchModal()" style="background:#334155;margin-bottom:15px;padding:8px 16px;font-size:0.9em;">← New Batch</button>`;
 
             batchResults.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'candidate-row';
-                
+
                 if (item.status === 'failed') {
                     row.style.borderColor = '#ef4444';
                     row.style.background = 'rgba(239,68,68,0.15)';
-                    row.innerHTML = `<div class="error">Failed to process ${escapeHtml(item.filename)} - ${item.error}</div>`;
-                } else if (item.result.candidates && item.result.candidates.length > 0) {
-                    const bestMatch = item.result.candidates[0];
+                    row.innerHTML = `<div class="error">Failed: ${escapeHtml(item.filename)} - ${item.error}</div>`;
+                } else {
+                    const meta = item.result.qwen_meta || {};
+                    const best = (item.result.candidates || [])[0] || {};
+                    const artist = meta.artist || best.artist || 'Unknown';
+                    const title = meta.title || best.title || 'Unknown';
+                    const coverUrl = best.cover_url || '';
+
                     row.innerHTML = `
-                        <div style="display:flex;flex-direction:column;gap:8px;">
-                            <img src="${escapeHtml(bestMatch.cover_url)}" class="candidate-thumb"/>
+                        <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+                            ${coverUrl ? `<img src="${escapeHtml(coverUrl)}" class="candidate-thumb"/>` : ''}
                             <div class="candidate-info">
-                                <div class="candidate-artist">${escapeHtml(item.result.qwen_meta?.artist || 'Unknown')}</div>
-                                <div class="candidate-title">${escapeHtml(item.result.qwen_meta?.title || 'Unknown')}</div>
-                                <div style="display:flex;align-items:center;margin-top:4px;">
-                                    <span style="color:#4ade80;font-size:0.85em;">✅ Processed</span>
-                                    <span class="match-pct" style="margin-left:10px;">Match: ${bestMatch.similarity?.toFixed(1)}%</span>
-                                </div>
+                                <div class="candidate-artist">${escapeHtml(artist)}</div>
+                                <div class="candidate-title">${escapeHtml(title)}</div>
+                                ${item.filename && batchMode !== 'single-photo' ? `<div style="color:#64748b;font-size:0.75em;margin-top:2px;">${escapeHtml(item.filename)}</div>` : ''}
                             </div>
                         </div>
-                        <div style="display:flex;flex-direction:column;gap:6px;">
-                            <button onclick="alert('To catalog this album, use the regular upload workflow. Batch automation is coming in a future release.')" style="background:#4ade80;color:#000;padding:8px 12px;font-size:0.9em;text-align:center;">✅ Catalog Now</button>
+                        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                            <button onclick="catalogFromBatch(batchResults[${idx}])" style="background:#4ade80;color:#000;padding:8px 12px;font-size:0.9em;text-align:center;">✅ Catalog</button>
                         </div>
                     `;
                 }

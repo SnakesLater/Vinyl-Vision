@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
 import image_match
-from lm_studio import analyze_cover, analyze_cover_full
+from lm_studio import analyze_cover, analyze_cover_full, analyze_cover_multi
 from src.optimize_images import optimize_image_for_clip
 from src.http_pool import MBClientPool
 from src.rate_limiter import DiscogsRateLimiter
@@ -361,6 +361,50 @@ async def batch_upload(files: list[UploadFile] = File(...)):
             })
 
     return {"total": len(files), "results": results}
+
+
+@app.post("/batch/multi-photo")
+async def batch_multi_photo(image: UploadFile = File(...)):
+    """Identify multiple albums from a single photo using Qwen vision."""
+    img_bytes = await image.read()
+    if not img_bytes:
+        raise HTTPException(400, "No image file provided")
+
+    albums = await analyze_cover_multi(img_bytes)
+    if not albums:
+        return {"total": 0, "results": []}
+
+    print(f"[multi-photo] Qwen found {len(albums)} albums: {albums}", flush=True)
+
+    candidates_by_title = {}
+
+    for a in albums:
+        artist = a.get("artist", "").strip()
+        title = a.get("title", "").strip()
+        key = f"{artist}|{title}"
+        if not artist or not title or key in candidates_by_title:
+            continue
+
+        mb_hits = await mb_search_by_text(artist, title)
+        cover_url = ""
+        mbid = ""
+        if mb_hits:
+            hit = mb_hits[0]
+            mbid = hit.get("id", "")
+            cover_ok = await check_caa_cover(mbid) if mbid else False
+            if cover_ok:
+                cover_url = f"https://coverartarchive.org/release/{mbid}/front-250.jpg"
+
+        candidates_by_title[key] = {
+            "artist": artist,
+            "title": title,
+            "mbid": mbid,
+            "cover_url": cover_url,
+        }
+
+    results = [{"index": i + 1, **v} for i, v in enumerate(candidates_by_title.values())]
+    print(f"[multi-photo] returning {len(results)} candidates", flush=True)
+    return {"total": len(results), "results": results}
 
 
 @app.post("/search-text")

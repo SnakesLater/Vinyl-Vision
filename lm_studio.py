@@ -24,6 +24,15 @@ QUICK_PROMPT = (
     '{"artist": "...", "title": "..."}'
 )
 
+MULTI_PROMPT = (
+    'List EVERY album cover visible in this image. Be thorough — scan left to right, top to bottom. '
+    'If a cover is partially visible or at an angle, still identify it if you can. '
+    'Rely PRIMARILY on visual style, artwork, colors, and imagery — text is secondary confirmation.\n\n'
+    'Output ONLY valid JSON as an array (one object per album found, empty array if none):\n'
+    '[{"artist": "Artist Name", "title": "Album Title"}, ...]\n\n'
+    'No markdown, no backticks, no extra text.'
+)
+
 FULL_PROMPT = (
     'Identify this album by its visual design, artwork style, colors, imagery, and composition. '
     'Many album covers use stylized, hand-drawn, or non-standard text that is hard to read. '
@@ -96,17 +105,17 @@ class QwenClient:
     
     async def analyze(self, prompt: str, max_tokens: int, image_bytes: bytes) -> Optional[dict]:
         """Call Qwen with retry logic and exponential backoff.
-        
+
         Args:
             prompt: The prompt to send to Qwen
             max_tokens: Maximum tokens for response
             image_bytes: Image bytes to analyze
-            
+
         Returns:
-            Parsed JSON result or None if all retries failed
+            Parsed JSON object or None if all retries failed
         """
         last_error = None
-        
+
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
                 print(f"[LM] Qwen attempt {attempt}/{_MAX_RETRIES}...", flush=True)
@@ -114,13 +123,72 @@ class QwenClient:
             except Exception as e:
                 last_error = e
                 if attempt < _MAX_RETRIES:
-                    # Exponential backoff (2s, 4s, 8s...)
                     wait_time = _BACKOFF_FACTOR ** attempt * 0.5
                     print(f"[LM] retrying in {wait_time:.1f}s (attempt {attempt}/{_MAX_RETRIES})...", flush=True)
                     await asyncio.sleep(wait_time)
                 else:
                     print(f"[LM] exhausted retries ({_MAX_RETRIES}), last error: {e}")
-        
+
+        return None
+
+    async def _call_as_list(self, prompt: str, max_tokens: int, image_bytes: bytes) -> Optional[list]:
+        """Like _call but expects a JSON array response."""
+        try:
+            b64 = base64.b64encode(image_bytes).decode("utf-8")
+            mime = _detect_mime(image_bytes[:4])
+
+            payload = {
+                "model": self.model,
+                "messages": [{
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+                        {"type": "text", "text": prompt},
+                    ],
+                }],
+                "temperature": 0.1,
+                "max_tokens": max_tokens,
+            }
+
+            async with httpx.AsyncClient(timeout=self.timeout) as c:
+                r = await c.post(LM_STUDIO_URL, json=payload)
+                r.raise_for_status()
+
+            data = r.json()
+            content = data["choices"][0]["message"]["content"]
+            content = re.sub(r'```(?:json)?\s*', '', content).strip()
+            content = re.sub(r'\s*```\s*$', '', content).strip()
+
+            parsed = json.loads(content)
+            if isinstance(parsed, list):
+                return parsed
+            print(f"[LM] expected array, got {type(parsed).__name__}: {content[:200]}")
+            return None
+
+        except httpx.HTTPError as e:
+            print(f"[LM] HTTP error (will retry): {e.response.status_code if e.response else 'unknown'}")
+            raise
+        except Exception as e:
+            print(f"[LM] call failed: {type(e).__name__}: {e}")
+            return None
+
+    async def analyze_multi(self, prompt: str, max_tokens: int, image_bytes: bytes) -> Optional[list]:
+        """Call Qwen expecting a JSON array, with retry logic."""
+        last_error = None
+
+        for attempt in range(1, _MAX_RETRIES + 1):
+            try:
+                print(f"[LM] Qwen multi attempt {attempt}/{_MAX_RETRIES}...", flush=True)
+                return await self._call_as_list(prompt, max_tokens, image_bytes)
+            except Exception as e:
+                last_error = e
+                if attempt < _MAX_RETRIES:
+                    wait_time = _BACKOFF_FACTOR ** attempt * 0.5
+                    print(f"[LM] retrying in {wait_time:.1f}s (attempt {attempt}/{_MAX_RETRIES})...", flush=True)
+                    await asyncio.sleep(wait_time)
+                else:
+                    print(f"[LM] exhausted retries ({_MAX_RETRIES}), last error: {e}")
+
         return None
 
 
@@ -136,4 +204,11 @@ async def analyze_cover_full(image_bytes: bytes) -> dict | None:
     """Full enrichment: year, label, genre, type, info, discogs_id, price_estimate."""
     client = QwenClient()
     return await client.analyze(FULL_PROMPT, 3072, image_bytes)
+
+
+async def analyze_cover_multi(image_bytes: bytes) -> list[dict]:
+    """Identify multiple albums in a single photo. Returns a list of {artist, title}."""
+    client = QwenClient()
+    result = await client.analyze_multi(MULTI_PROMPT, 2048, image_bytes)
+    return result or []
 
