@@ -65,6 +65,8 @@
         .candidate-year { color: #818cf8; font-size: 0.8em; margin-top: 2px; }
         .match-pct { color: #4ade80; font-size: 0.85em; font-weight: 600; margin-left: 8px; }
         .index-badge { display: inline-block; background: rgba(74, 222, 128, 0.15); color: #4ade80; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
+        .index-badge.ai-badge { background: rgba(129, 140, 248, 0.2); color: #a5b4fc; }
+        .qwen-row { border-color: rgba(129, 140, 248, 0.3) !important; }
         .selected-label { color: #4ade80; font-size: 0.8em; font-weight: 600; margin-left: 10px; }
 
         /* Metadata */
@@ -100,8 +102,7 @@
         .fallback-row input { flex: 1; }
         #fallback-message { color: #fbbf24; font-size: 0.9em; margin-bottom: 10px; }
 
-        /* ── Catalog ── */
-
+        /* Catalog Styles */
         .catalog-stats-bar {
             display: flex; justify-content: space-around; align-items: center;
             padding: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
@@ -125,9 +126,7 @@
             background: #0f172a; color: #fff; font-size: 0.85em; width: 220px;
         }
 
-        .cat-empty {
-            text-align: center; padding: 60px 20px; color: #64748b;
-        }
+        .cat-empty { text-align: center; padding: 60px 20px; color: #64748b; }
         .cat-empty strong { color: #94a3b8; }
 
         /* Grid */
@@ -213,7 +212,7 @@
 <body>
     <div class="container">
         <h1>Vinyl-Vision</h1>
-        <p class="subtitle">Drop album art &rarr; Identify &rarr; Catalog &rarr; Browse</p>
+        <p class="subtitle">Drop album art → Identify → Catalog → Browse</p>
 
         <!-- Tab bar -->
         <div class="tab-bar">
@@ -245,42 +244,80 @@
 
             <div id="search-results"></div>
 
+            <!-- Metadata Display Section -->
+            <div id="metadata-display" style="display:none;">
+                <h3>Select a Candidate to Catalog</h3>
+                <p style="color:#64748b;margin-bottom:15px;">Click on any result above, then use the form below to catalog.</p>
+                <div class="metadata-grid" id="metadata-display-grid"></div>
+            </div>
+
             <div id="fallback-search">
                 <div id="fallback-message">Could not auto-identify the album.</div>
-                <p style="color:#aaa; font-size:0.9em;">Enter artist &amp; title to search MusicBrainz:</p>
+                <p style="color:#aaa; font-size:0.9em;">Enter artist & title to search MusicBrainz:</p>
                 <div class="fallback-row">
                     <input type="text" id="fb-artist" placeholder="Artist name" />
                     <input type="text" id="fb-title" placeholder="Album title" />
                 </div>
                 <button id="fb-search-btn">Search MusicBrainz</button>
+                <button onclick="toggleBatchModal()" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:10px;">📂 Batch Upload (5-10 photos)</button>
                 <div class="error" id="fb-error" style="display:none;"></div>
             </div>
 
-            <div id="metadata-display">
-                <h3>Full Metadata (Ready to Catalog)</h3>
-                <div class="metadata-grid" id="metadata-grid"></div>
-                <div class="form-group">
-                    <label>Additional Notes (optional)</label>
-                    <input type="text" id="notes" placeholder="Collection notes&hellip;" />
-                </div>
-                <div class="form-group">
-                    <label>Condition Grade</label>
-                    <select id="condition">
-                        <option value="NM">Near Mint (NM)</option>
-                        <option value="M">Mint (M)</option>
-                        <option value="EX">Excellent (EX)</option>
-                        <option value="VG">Very Good (VG)</option>
-                        <option value="GD">Good (GD)</option>
-                        <option value="FAIR">Fair</option>
-                        <option value="POOR">Poor</option>
-                    </select>
-                </div>
-                <button id="catalog-btn" disabled>Catalog This Release</button>
-                <button onclick="resetForm()">Another Image</button>
-            </div>
+            <!-- ── Detail Modal / Batch Upload Modal (Single overlay) ── -->
+            <div class="modal-overlay" id="detail-modal">
+                <!-- Batch Upload Mode -->
+                <div class="modal-content batch-modal-content" id="batch-modal-content">
+                    <h3>📂 Batch Upload Photos</h3>
+                    <p>Select 5-10 photos to process as a batch</p>
+                    <input type="file" id="batch-files" multiple accept="image/*" style="width:100%;margin-top:15px;">
 
-            <div id="catalog-stats" style="display:none;">
-                <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
+                    <div id="batch-progress" style="display:none;margin:20px 0;">
+                        <div id="progress-track">
+                            <div id="progress-fill" style="width:0%"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <span class="step active" id="batch-step-1">Selecting files</span>
+                            <span class="step done" id="batch-step-2">Processing...</span>
+                            <span class="step" id="batch-step-3">Review results</span>
+                        </div>
+                        <p style="text-align:center;margin-top:10px;"><strong id="batch-progress-text">Ready</strong></p>
+                    </div>
+
+                    <button onclick="processBatch()" id="batch-start-btn" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:15px;padding:12px 30px;font-size:16px;">🚀 Process Batch</button>
+
+                    <!-- Detail Mode (shown after selection) -->
+                    <div class="modal-content detail-modal-content" id="detail-modal-content">
+                        <h3>Full Metadata (Ready to Catalog)</h3>
+                        <div class="metadata-grid" id="metadata-grid"></div>
+                        <div class="form-group">
+                            <label>Additional Notes (optional)</label>
+                            <input type="text" id="notes" placeholder="Collection notes…" />
+                        </div>
+                        <div class="form-group">
+                            <label>Condition Grade</label>
+                            <select id="condition">
+                                <option value="NM">Near Mint (NM)</option>
+                                <option value="M">Mint (M)</option>
+                                <option value="EX">Excellent (EX)</option>
+                                <option value="VG">Very Good (VG)</option>
+                                <option value="GD">Good (GD)</option>
+                                <option value="FAIR">Fair</option>
+                                <option value="POOR">Poor</option>
+                            </select>
+                        </div>
+                        <button id="catalog-btn" disabled>Catalog This Release</button>
+                        <button onclick="resetForm()">Another Image</button>
+                    </div>
+                </div>
+
+                <!-- Catalog Stats (shown after upload) -->
+                <div class="modal-content catalog-stats-content" id="catalog-stats-content" style="display:none;">
+                    <h3>Catalog Update Complete</h3>
+                    <div id="catalog-stats">
+                        <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
+                    </div>
+                    <button onclick="closeDetail()" style="margin-top:20px;">Close & View Catalog</button>
+                </div>
             </div>
         </div>
 
@@ -288,27 +325,19 @@
         <div class="section" id="section-catalog">
             <div class="catalog-stats-bar" id="catalog-stats-bar">
                 <span class="stat">Albums<div><strong id="cat-count">0</strong></div></span>
-                <span class="stat">Genres<div><strong id="cat-genres">&mdash;</strong></div></span>
-                <span class="stat">Est. Value<div><strong id="cat-value">&mdash;</strong></div></span>
+                <span class="stat">Genres<div><strong id="cat-genres">&#8212;</strong></div></span>
+                <span class="stat">Est. Value<div><strong id="cat-value">&#8212;</strong></div></span>
             </div>
 
             <div class="catalog-toolbar">
                 <input type="text" id="cat-search" class="catalog-search-input" placeholder="Filter by artist, title, genre..." />
                 <div class="view-toggle">
-                    <button id="view-grid" class="active">&#x25A6; Grid</button>
-                    <button id="view-list">&#x2630; List</button>
+                    <button id="view-grid" class="active">&#9762; Grid</button>
+                    <button id="view-list">&#9774; List</button>
                 </div>
             </div>
 
             <div id="catalog-albums"></div>
-        </div>
-
-        <!-- Detail Modal -->
-        <div class="modal-overlay" id="detail-modal">
-            <div class="modal">
-                <button class="modal-close" onclick="closeDetail()">&times;</button>
-                <div id="detail-content"></div>
-            </div>
         </div>
     </div>
 
@@ -317,6 +346,7 @@
         let currentFile = null;
         let candidates  = [];
         let selectedMbid = null;
+        let currentQwenMeta = null;
         let progressTimer = null;
         let catalogData = [];
         let currentView = 'grid';
@@ -332,7 +362,7 @@
             });
         });
 
-        // ── Search (unchanged) ──
+        // ── Search ──
         const dropZone  = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -359,13 +389,8 @@
             document.getElementById('view-list').classList.add('active');
             document.getElementById('view-grid').classList.remove('active');
             renderCatalog();
-        });
+            });
 
-        function escapeHtml(s) {
-            const d = document.createElement('div');
-            d.textContent = s;
-            return d.innerHTML;
-        }
 
         function fmtPct(v) {
             if (v == null) return '';
@@ -400,7 +425,6 @@
             label.textContent = 'Analyzing cover art...';
             document.getElementById(steps[0]).className = 'step active';
             if (progressTimer) clearInterval(progressTimer);
-            // After 4s with no response, show we're waiting on AI
             progressTimer = setTimeout(() => {
                 fill.style.width = '30%';
                 fill.classList.add('pulsing');
@@ -460,26 +484,25 @@
             }
             if (data.fallback && (!data.candidates || data.candidates.length === 0)) {
                 document.getElementById('fallback-search').style.display = 'block';
-                if (data.qwen_artist) document.getElementById('fb-artist').value = data.qwen_artist;
-                if (data.qwen_title) document.getElementById('fb-title').value = data.qwen_title;
+                if (data.qwen_meta) {
+                    document.getElementById('fb-artist').value = data.qwen_meta.artist;
+                    document.getElementById('fb-title').value = data.qwen_meta.title;
+                }
                 document.getElementById('fb-artist').focus();
                 return;
             }
-            const resDiv = document.getElementById('search-results');
-            if (data.warning) {
-                let warnEl = document.getElementById('confidence-warning');
-                if (!warnEl) {
-                    warnEl = document.createElement('div');
-                    warnEl.id = 'confidence-warning';
-                    warnEl.className = 'warning';
-                    resDiv.parentNode.insertBefore(warnEl, resDiv);
-                }
-                warnEl.textContent = data.warning;
-                warnEl.style.display = 'block';
-            } else {
-                const warnEl = document.getElementById('confidence-warning');
-                if (warnEl) warnEl.style.display = 'none';
+            currentQwenMeta = data.qwen_meta || null;
+            if (currentQwenMeta) {
+                data.candidates = data.candidates || [];
+                data.candidates.unshift({
+                    mbid: 'qwen-ai',
+                    artist: currentQwenMeta.artist,
+                    title: currentQwenMeta.title,
+                    year: currentQwenMeta.year,
+                    from_qwen: true,
+                });
             }
+            const resDiv = document.getElementById('search-results');
             showCandidates(data.candidates || []);
         }
 
@@ -487,6 +510,11 @@
             candidates = list;
             selectedMbid = null;
             document.getElementById('catalog-btn').disabled = true;
+            
+            // Hide all metadata sections
+            const md = document.getElementById('metadata-display');
+            if (md) { md.style.display = 'none'; }
+            
             const resDiv = document.getElementById('search-results');
             if (list.length === 0) {
                 resDiv.innerHTML = '<div class="error">No matching releases found.</div>';
@@ -499,24 +527,29 @@
             list.forEach(c => {
                 const row = document.createElement('div');
                 row.className = 'candidate-row';
+                if (c.from_qwen) row.classList.add('qwen-row');
                 row.dataset.mbid = c.mbid;
                 row.onclick = () => selectCandidate(row, c.mbid);
                 const img = document.createElement('img');
                 img.className = 'candidate-thumb';
                 img.alt = 'cover';
-                img.onerror = () => { img.style.display = 'none'; };
-                img.src = c.cover_url;
+                if (c.from_qwen) { img.style.display = 'none'; }
+                else {
+                    img.onerror = () => { img.style.display = 'none'; };
+                    img.src = c.cover_url;
+                }
                 row.innerHTML = '';
                 row.appendChild(img);
-                const badge = c.from_index ? `<span class="index-badge">From your collection</span>` : '';
+                const badge = c.from_index ? `<span class="index-badge">From your collection</span>` :
+                    c.from_qwen ? `<span class="index-badge ai-badge">AI Recognition</span>` : '';
                 const pct = c.similarity ? `<span class="match-pct">${fmtPct(c.similarity)}</span>` : '';
                 row.innerHTML += `
                     <div class="candidate-info">
                         <div class="candidate-artist">${escapeHtml(c.artist)}${badge}</div>
                         <div class="candidate-title">${escapeHtml(c.title)}</div>
-                        <div class="candidate-year">${escapeHtml(c.year || '\u2013')}${pct}</div>
+                        <div class="candidate-year">${escapeHtml(c.year || '&#8212;')}${pct}</div>
                     </div>
-                    <span class="selected-label" style="display:none;">\u2713 Selected</span>
+                    <span class="selected-label" style="display:none;">✓ Selected</span>
                 `;
                 resDiv.appendChild(row);
             });
@@ -534,20 +567,44 @@
             document.getElementById('catalog-btn').disabled = false;
             const sel = candidates.find(c => c.mbid === mbid);
             if (sel) {
-                const grid = document.getElementById('metadata-grid');
-                grid.innerHTML = '';
-                const rows = [
-                    ['Artist', sel.artist],
-                    ['Title',  sel.title],
-                    ['Year',   sel.year || 'Unknown'],
-                    ['Match',  sel.similarity ? fmtPct(sel.similarity) : '\u2014'],
-                    ['MBID',   sel.mbid],
-                ];
-                rows.forEach(([lbl, val]) => {
-                    grid.innerHTML += `<div class="metadata-item"><span class="label">${lbl}</span><div class="value">${escapeHtml(String(val))}</div></div>`;
-                });
-                document.getElementById('metadata-display').style.display = 'block';
+                const displayGrid = document.getElementById('metadata-display-grid');
+                displayGrid.innerHTML = '';
+                if (sel.from_qwen && currentQwenMeta) {
+                    const m = currentQwenMeta;
+                    const rows = [
+                        ['Artist', m.artist],
+                        ['Title',  m.title],
+                        ['Year',   m.year || '&#8212;'],
+                        ['Label',  m.label || '&#8212;'],
+                        ['Genre',  (m.genre || []).join(', ') || '&#8212;'],
+                        ['Discogs ID', m.discogs_id || '&#8212;'],
+                        ['Price Est.', m.price_estimate || '&#8212;'],
+                    ];
+                    rows.forEach(([lbl, val]) => {
+                        displayGrid.innerHTML += `<div class="metadata-item"><span class="label">${lbl}</span><div class="value">${escapeHtml(String(val))}</div></div>`;
+                    });
+                    displayGrid.innerHTML += `<div class="metadata-item"><span class="label">Info</span><div class="value" style="font-size:0.85em;line-height:1.4">${escapeHtml(m.info || '&#8212;')}</div></div>`;
+                    document.getElementById('catalog-btn').textContent = 'Catalog from AI Suggestion';
+                } else {
+                    const rows = [
+                        ['Artist', sel.artist],
+                        ['Title',  sel.title],
+                        ['Year',   sel.year || 'Unknown'],
+                        ['Match',  sel.similarity ? fmtPct(sel.similarity) : '&#8212;'],
+                        ['MBID',   sel.mbid],
+                    ];
+                    rows.forEach(([lbl, val]) => {
+                        displayGrid.innerHTML += `<div class="metadata-item"><span class="label">${lbl}</span><div class="value">${escapeHtml(String(val))}</div></div>`;
+                    });
+                document.getElementById('catalog-btn').textContent = 'Catalog This Release';
             }
+            // Show metadata display section
+            const metadataDisplay = document.getElementById('metadata-display');
+            if (metadataDisplay) {
+                metadataDisplay.style.display = 'block';
+                metadataDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
         }
 
         async function doFallbackSearch() {
@@ -574,26 +631,45 @@
         }
 
         async function doCatalog() {
-            if (!selectedMbid || !currentFile) return;
-            const sel = candidates.find(c => c.mbid === selectedMbid);
-            if (!sel) return;
+            if (!currentFile) return;
             const formData = new FormData();
             formData.append('image', currentFile);
-            formData.append('artist', sel.artist);
-            formData.append('title', sel.title);
-            formData.append('mbid', sel.mbid);
-            formData.append('cover_url', sel.cover_url || '');
             formData.append('condition', document.getElementById('condition').value);
             formData.append('notes', document.getElementById('notes').value);
+
+            if (selectedMbid === 'qwen-ai' && currentQwenMeta) {
+                const m = currentQwenMeta;
+                formData.append('artist', m.artist);
+                formData.append('title', m.title);
+                formData.append('mbid', '');
+                formData.append('cover_url', '');
+                formData.append('year', String(m.year || ''));
+                formData.append('label', m.label || '');
+                formData.append('genre', (m.genre || []).join(', '));
+                formData.append('info', m.info || '');
+                formData.append('discogs_id', String(m.discogs_id || ''));
+                formData.append('price_estimate', m.price_estimate || '');
+            } else {
+                if (!selectedMbid) return;
+                const sel = candidates.find(c => c.mbid === selectedMbid);
+                if (!sel) return;
+                formData.append('artist', sel.artist);
+                formData.append('title', sel.title);
+                formData.append('mbid', sel.mbid);
+                formData.append('cover_url', sel.cover_url || '');
+            }
+
             try {
                 const r = await fetch(API + 'upload', { method: 'POST', body: formData });
                 if (!r.ok) { const e = await r.json(); throw new Error(e.detail || r.statusText); }
                 const result = await r.json();
                 alert('Album cataloged!');
-                document.getElementById('catalog-stats').style.display = 'block';
+                document.getElementById('batch-modal-content').querySelector('#catalog-stats-content').style.display = 'block';
+                document.getElementById('batch-modal-content').querySelectorAll('#batch-modal-content > :not(#catalog-stats-content)').forEach(el => {
+                    if (!el.classList.contains('hidden')) el.style.display = 'none';
+                });
                 const cnt = parseInt(document.getElementById('album-count').textContent || '0') + 1;
                 document.getElementById('album-count').textContent = cnt;
-                document.getElementById('catalog-btn').disabled = true;
             } catch(err) {
                 alert(err.message);
             }
@@ -603,21 +679,41 @@
             currentFile = null;
             candidates  = [];
             selectedMbid = null;
-            document.getElementById('metadata-display').style.display = 'none';
-            document.getElementById('search-results').style.display = 'none';
-            document.getElementById('search-results').innerHTML = '';
-            document.getElementById('fallback-search').style.display = 'none';
-            document.getElementById('preview-container').style.display = 'none';
-            document.getElementById('progress-container').style.display = 'none';
-            document.getElementById('drop-zone').style.display = 'block';
-            document.getElementById('catalog-btn').disabled = true;
-            document.getElementById('notes').value = '';
-            document.getElementById('condition').value = 'NM';
+            currentQwenMeta = null;
+            
+            // Hide all sections (safe with null checks)
+            const elementsToHide = ['metadata-display', 'search-results', 'fallback-search', 
+                'preview-container', 'progress-container'];
+            elementsToHide.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.style.display = 'none'; }
+            });
+            
+            // Show drop zone
+            const dropZone = document.getElementById('drop-zone');
+            if (dropZone) dropZone.style.display = 'block';
+            
+            // Reset UI state
+            if (document.getElementById('search-results')) {
+                document.getElementById('search-results').innerHTML = '';
+            }
+            
+            if (document.getElementById('catalog-btn')) {
+                document.getElementById('catalog-btn').disabled = true;
+            }
+            
+            if (document.getElementById('notes')) {
+                document.getElementById('notes').value = '';
+            }
+            
+            if (document.getElementById('condition')) {
+                document.getElementById('condition').value = 'NM';
+            }
+            
             if (progressTimer) clearInterval(progressTimer);
         }
 
         // ── Catalog View ──
-
         async function loadCatalog() {
             try {
                 const r = await fetch(API + 'catalog');
@@ -640,9 +736,9 @@
                 (a.genre || []).forEach(g => allGenres.add(g));
                 if (a.price_range && a.price_range.avg) totalValue += Number(a.price_range.avg);
             });
-            document.getElementById('cat-genres').textContent = allGenres.size || '\u2014';
+            document.getElementById('cat-genres').textContent = allGenres.size || '&#8212;';
             document.getElementById('cat-value').textContent =
-                totalValue > 0 ? '$' + totalValue.toFixed(0) : '\u2014';
+                totalValue > 0 ? '$' + totalValue.toFixed(0) : '&#8212;';
         }
 
         function renderCatalog() {
@@ -702,9 +798,9 @@
                                     <div class="title">${escapeHtml(a.title)}</div>
                                     <div class="meta">
                                         ${escapeHtml(a.year || '')}
-                                        ${a.label ? '&middot; ' + escapeHtml(a.label) : ''}
-                                        ${a.format ? '&middot; ' + escapeHtml(a.format) : ''}
-                                        ${a.country ? '&middot; ' + escapeHtml(a.country) : ''}
+                                        ${a.label ? '&#183; ' + escapeHtml(a.label) : ''}
+                                        ${a.format ? '&#183; ' + escapeHtml(a.format) : ''}
+                                        ${a.country ? '&#183; ' + escapeHtml(a.country) : ''}
                                     </div>
                                     ${tags.length ? '<div class="tags">' +
                                         tags.slice(0, 8).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('') +
@@ -744,7 +840,6 @@
                     ${album.condition ? `<div class="ditem"><div class="lbl">Condition</div><div class="val">${escapeHtml(album.condition)}</div></div>` : ''}
                     ${album.country ? `<div class="ditem"><div class="lbl">Country</div><div class="val">${escapeHtml(album.country)}</div></div>` : ''}
                     ${album.catalog_number ? `<div class="ditem"><div class="lbl">Cat. No.</div><div class="val">${escapeHtml(album.catalog_number)}</div></div>` : ''}
-                    ${album.catalog_number ? '' : ''}
                 </div>
                 ${(album.genre || []).length ? '<div class="tags">' +
                     (album.genre || []).map(g => `<span class="tag">${escapeHtml(String(g))}</span>`).join('') +
@@ -774,6 +869,145 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeDetail();
         });
+
+        // ── Batch Upload Modal ──
+        let batchFiles = [];
+        let batchResults = [];
+
+        function toggleBatchModal() {
+            const modal = document.getElementById('detail-modal');
+            // Hide content, show batch overlay if needed
+            document.getElementById('batch-files').value = '';
+            batchResults = [];
+            modal.style.display = 'none';
+            setTimeout(() => {
+                modal.style.display = 'flex';
+            }, 10);
+        }
+
+        async function processBatch() {
+            batchFiles = Array.from(document.getElementById('batch-files').files);
+            if (batchFiles.length < 1) {
+                alert('Please select at least one file');
+                return;
+            }
+
+            const content = document.getElementById('detail-modal');
+            content.innerHTML = ''; // Clear existing content
+            
+            const progressDiv = document.createElement('div');
+            progressDiv.id = 'batch-progress';
+            progressDiv.style.cssText = 'display:block;margin:20px 0;text-align:center;';
+            progressDiv.innerHTML = `
+                <p style="margin-bottom:15px;"><strong>📂 Processing ${batchFiles.length} file(s)...</strong></p>
+                <div id="progress-track" style="background:#334155;border-radius:8px;height:8px;overflow:hidden;margin-bottom:8px;">
+                    <div id="progress-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#4a90d9,#66a3ff);transition:width 0.4s ease;border-radius:8px;"></div>
+                </div>
+                <div class="progress-steps">
+                    <span class="step active" id="batch-step-1">Selecting files</span>
+                    <span class="step done" id="batch-step-2">Processing...</span>
+                    <span class="step" id="batch-step-3">Review results</span>
+                </div>
+                <p style="margin-top:10px;color:#64748b;">This may take a moment. You'll be able to catalog matches after processing.</p>
+            `;
+            content.appendChild(progressDiv);
+
+            let processed = 0;
+            let successCount = 0;
+
+            for (let i = 0; i < batchFiles.length; i++) {
+                const formData = new FormData();
+                formData.append('image', batchFiles[i]);
+
+                try {
+                    const res = await fetch('/search', { method: 'POST', body: formData });
+                    const data = await res.json();
+
+                    if (data.candidates && data.candidates.length > 0) {
+                        successCount++;
+                    }
+
+                    batchResults.push({
+                        filename: batchFiles[i].name,
+                        result: data,
+                        status: 'processed'
+                    });
+                } catch (err) {
+                    batchResults.push({
+                        filename: batchFiles[i].name,
+                        error: err.message,
+                        status: 'failed'
+                    });
+                }
+
+                processed++;
+                const fill = progressDiv.querySelector('#progress-fill');
+                if (fill) fill.style.width = ((i + 1) / batchFiles.length * 100) + '%';
+                await new Promise(r => setTimeout(r, 50));
+            }
+
+            // Show results after processing
+            showBatchResults();
+        }
+
+        function showBatchResults() {
+            const content = document.getElementById('detail-modal');
+            content.innerHTML = `
+                <div style="background:#1a1a2e;padding:30px 20px;border-radius:12px;text-align:center;">
+                    <h2>📊 Batch Processing Complete</h2>
+                    <p><strong>Total:</strong> ${batchFiles.length} file(s)</p>
+                    <p style="color:#4ade80;"><strong>Success:</strong> ${successCount} album(s) identified</p>
+                    <p style="color:#ef4444;margin:10px 0;"><strong>Failed:</strong> ${batchFiles.length - successCount}</p>
+                    <div style="margin-top:20px;">
+                        <button onclick="showBatchGrid()" style="background:#4a90d9;padding:12px 30px;font-size:16px;cursor:pointer;">🔍 View All Results</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showBatchGrid() {
+            const content = document.getElementById('detail-modal');
+            const summaryDiv = content.querySelector('[style*="background:#1a1a2e"]');
+            if (summaryDiv) summaryDiv.style.display = 'none';
+
+            content.innerHTML = '<h3 style="margin-bottom:15px;">📂 Batch Processing Results</h3>';
+
+            batchResults.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'candidate-row';
+                
+                if (item.status === 'failed') {
+                    row.style.borderColor = '#ef4444';
+                    row.style.background = 'rgba(239,68,68,0.15)';
+                    row.innerHTML = `<div class="error">Failed to process ${escapeHtml(item.filename)} - ${item.error}</div>`;
+                } else if (item.result.candidates && item.result.candidates.length > 0) {
+                    const bestMatch = item.result.candidates[0];
+                    row.innerHTML = `
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <img src="${escapeHtml(bestMatch.cover_url)}" class="candidate-thumb"/>
+                            <div class="candidate-info">
+                                <div class="candidate-artist">${escapeHtml(item.result.qwen_meta?.artist || 'Unknown')}</div>
+                                <div class="candidate-title">${escapeHtml(item.result.qwen_meta?.title || 'Unknown')}</div>
+                                <div style="display:flex;align-items:center;margin-top:4px;">
+                                    <span style="color:#4ade80;font-size:0.85em;">✅ Processed</span>
+                                    <span class="match-pct" style="margin-left:10px;">Match: ${bestMatch.similarity?.toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <button onclick="alert('To catalog this album, use the regular upload workflow. Batch automation is coming in a future release.')" style="background:#4ade80;color:#000;padding:8px 12px;font-size:0.9em;text-align:center;">✅ Catalog Now</button>
+                        </div>
+                    `;
+                }
+                content.appendChild(row);
+            });
+        }
+
+        // Helper function for escaping HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
     </script>
-</body>
 </html>
