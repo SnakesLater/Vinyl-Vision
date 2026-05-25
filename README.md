@@ -1,6 +1,6 @@
 # Vinyl-Vision 🎵
 
-Drop an album cover photo → get artist, title, Discogs metadata, pricing, and AI-generated notes — all cataloged locally.
+Drop an album cover photo → get artist, title, Discogs metadata, pricing, and AI-generated notes — all cataloged locally. Supports single albums, batch uploads, and group photos with multiple covers.
 
 ## How it works
 
@@ -14,6 +14,15 @@ Three layers of matching:
 1. **CLIP** — instant re-match if you've already cataloged this cover (local embedding index)
 2. **Qwen 3.5-9B** — reads the cover art and identifies artist, title, year, label, genre, and writes a fun info blurb
 3. **MusicBrainz + Discogs** — enriches with release details, market pricing, tags, and Discogs links
+
+## Features
+
+| Mode | Description |
+|------|-------------|
+| **📀 Single Album** | Drag-and-drop or tap to photo — identify one album cover at a time |
+| **📚 Batch Upload** | Upload 5-10 individual album photos, process in sequence |
+| **🖼️ Group Photo** | One photo of multiple albums — Qwen identifies each cover individually |
+| **🔍 Qwen Hint** | Optional context field per mode — tell Qwen what to expect (e.g. "jazz from the 60s") before sending the image |
 
 ## Prerequisites
 
@@ -35,7 +44,7 @@ export HF_TOKEN="your_huggingface_token"
 # 3. Make sure LM Studio is running with Qwen 3.5-9B on port 1234
 
 # 4. Start the app
-python main.py
+uvicorn app:app --host 0.0.0.0 --port 8081
 
 # 5. Open http://localhost:8081
 ```
@@ -55,18 +64,18 @@ The container uses `network_mode: host` so it reaches LM Studio on `localhost:12
 1. Connect your phone to the same WiFi as this computer
 2. Find your computer's LAN IP (`ip addr show` on Linux)
 3. Open `http://<YOUR_IP>:8081` in Safari or Chrome
-4. Tap the drop zone → take a photo or choose from gallery
+4. Use any mode — Single Album (auto-opens camera), Batch Upload, or Group Photo
 
 ## View logs
 
-All logs print to the terminal where you ran `python main.py`. Watch it live to see LM Studio responses, MB search results, and any errors.
+All logs print to the terminal where you ran `uvicorn`. Watch it live to see LM Studio responses, MB search results, and any errors.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
 | "LM Studio not running" | Start LM Studio, load Qwen 3.5-9B, enable API server on port 1234 |
-| "No matches in MusicBrainz" | Try a clearer photo — Qwen needs to read the text on the cover |
+| "No matches in MusicBrainz" | Try a clearer photo, or use the Qwen hint field to provide context |
 | Permission errors on catalog/ or images/ | `sudo chown -R $(whoami) catalog/ images/` |
 | 500 error on upload | Check the terminal log for the specific error |
 
@@ -87,7 +96,6 @@ All logs print to the terminal where you ran `python main.py`. Watch it live to 
 ├── app.py              # FastAPI backend (routes, MB search, Discogs client)
 ├── lm_studio.py        # Qwen 3.5-9B API wrapper
 ├── image_match.py      # CLIP embeddings, local index, visual ranking
-├── main.py             # Entry point (uvicorn)
 ├── app.html            # Frontend (single-page app)
 ├── requirements.txt    # Python dependencies
 ├── Dockerfile          # Docker build
@@ -95,7 +103,3 @@ All logs print to the terminal where you ran `python main.py`. Watch it live to 
 ├── catalog/            # Your catalog data (catalog.json + covers_index.json)
 └── images/             # Uploaded cover photos
 ```
-
-## Coming Soon 🛒
-
-Links to buy the albums you identify — directly from where you'd actually want to buy them. Stay tuned.
