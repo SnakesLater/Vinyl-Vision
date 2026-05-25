@@ -194,10 +194,13 @@ class QwenClient:
 
 # ─── Module-level convenience functions ─────────────────────────────────────────
 
-async def analyze_cover(image_bytes: bytes) -> dict | None:
+async def analyze_cover(image_bytes: bytes, hint: str = "") -> dict | None:
     """Quick ID: artist + title only (fast, ~15-30s)."""
     client = QwenClient()
-    return await client.analyze(QUICK_PROMPT, 1536, image_bytes)
+    prompt = QUICK_PROMPT
+    if hint:
+        prompt = f"Context: {hint}\n\n{QUICK_PROMPT}"
+    return await client.analyze(prompt, 1536, image_bytes)
 
 
 async def analyze_cover_full(image_bytes: bytes) -> dict | None:
@@ -206,9 +209,12 @@ async def analyze_cover_full(image_bytes: bytes) -> dict | None:
     return await client.analyze(FULL_PROMPT, 3072, image_bytes)
 
 
-async def analyze_cover_multi(image_bytes: bytes) -> list[dict]:
+async def analyze_cover_multi(image_bytes: bytes, hint: str = "") -> list[dict]:
     """Identify multiple albums in a single photo. Returns a list of {artist, title}."""
     client = QwenClient()
-    result = await client.analyze_multi(MULTI_PROMPT, 2048, image_bytes)
+    prompt = MULTI_PROMPT
+    if hint:
+        prompt = f"Context: {hint}\n\n{MULTI_PROMPT}"
+    result = await client.analyze_multi(prompt, 2048, image_bytes)
     return result or []
 

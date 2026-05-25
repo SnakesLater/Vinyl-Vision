@@ -240,7 +240,7 @@ class Catalog:
 catalog = Catalog(CATALOG_DIR / "catalog.json")
 
 
-async def _process_image(image_bytes: bytes) -> dict:
+async def _process_image(image_bytes: bytes, hint: str = "") -> dict:
     """Run the full search pipeline on image bytes.
 
     Returns a dict with keys: candidates, fallback, qwen_meta, message, from_index.
@@ -261,7 +261,7 @@ async def _process_image(image_bytes: bytes) -> dict:
         return {"candidates": [match], "fallback": False, "from_index": True}
 
     # Tier 2: LM Studio vision model — quick ID (artist + title)
-    result = await analyze_cover(image_bytes)
+    result = await analyze_cover(image_bytes, hint)
     _last_qwen_result = result
 
     if not result:
@@ -326,16 +326,16 @@ async def get_catalog():
 
 
 @app.post("/search")
-async def search(image: UploadFile = File(...)):
+async def search(image: UploadFile = File(...), hint: str = Form("")):
     """Drop image -> CLIP index -> LM Studio -> MB -> CAA -> CLIP rank -> candidates"""
     img_bytes = await image.read()
     if not img_bytes:
         raise HTTPException(400, "No image file provided")
-    return await _process_image(img_bytes)
+    return await _process_image(img_bytes, hint)
 
 
 @app.post("/batch/upload")
-async def batch_upload(files: list[UploadFile] = File(...)):
+async def batch_upload(files: list[UploadFile] = File(...), hint: str = Form("")):
     """Run the full search pipeline on multiple images."""
     if len(files) < 1 or len(files) > 15:
         raise HTTPException(400, "Batch must have 1-15 files")
@@ -344,7 +344,7 @@ async def batch_upload(files: list[UploadFile] = File(...)):
     for idx, f in enumerate(files, 1):
         try:
             img_bytes = await f.read()
-            result = await _process_image(img_bytes)
+            result = await _process_image(img_bytes, hint)
             results.append({
                 "index": idx,
                 "filename": f.filename,
@@ -364,13 +364,13 @@ async def batch_upload(files: list[UploadFile] = File(...)):
 
 
 @app.post("/batch/multi-photo")
-async def batch_multi_photo(image: UploadFile = File(...)):
+async def batch_multi_photo(image: UploadFile = File(...), hint: str = Form("")):
     """Identify multiple albums from a single photo using Qwen vision."""
     img_bytes = await image.read()
     if not img_bytes:
         raise HTTPException(400, "No image file provided")
 
-    albums = await analyze_cover_multi(img_bytes)
+    albums = await analyze_cover_multi(img_bytes, hint)
     if not albums:
         return {"total": 0, "results": []}
 
@@ -539,12 +539,20 @@ async def upload(
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return FileResponse(BASE_DIR / "app.html")
+    return FileResponse(BASE_DIR / "app.html", headers={
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    })
 
 
 @app.get("/app", include_in_schema=False)
 async def app_page():
-    return FileResponse(BASE_DIR / "app.html")
+    return FileResponse(BASE_DIR / "app.html", headers={
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    })
 
 
 @app.get("/favicon.ico", include_in_schema=False)

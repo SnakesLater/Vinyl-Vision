@@ -17,146 +17,115 @@
         h1 { text-align: center; margin-bottom: 4px; font-size: 1.8em; }
         .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 0.85em; }
 
-        /* Tabs */
-        .tab-bar { display: flex; gap: 0; margin-bottom: 25px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .tab-bar { display: flex; gap: 0; margin-bottom: 0; background: rgba(255,255,255,0.05); border-radius: 10px 10px 0 0; overflow: hidden; }
         .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #94a3b8; font-weight: 600; transition: all 0.2s; border: none; background: transparent; font-size: 1em; }
         .tab:hover { background: rgba(74,144,217,0.1); color: #fff; }
         .tab.active { background: rgba(74,144,217,0.2); color: #66a3ff; box-shadow: inset 0 -2px 0 #4a90d9; }
 
+        .sub-tab-bar { display: flex; gap: 0; margin-bottom: 20px; background: rgba(255,255,255,0.03); border-radius: 0 0 10px 10px; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.05); }
+        .sub-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: #64748b; font-weight: 500; transition: all 0.2s; border: none; background: transparent; font-size: 0.9em; }
+        .sub-tab:hover { background: rgba(74,144,217,0.08); color: #cbd5e1; }
+        .sub-tab.active { background: rgba(74,144,217,0.15); color: #93c5fd; box-shadow: inset 0 -2px 0 #60a5fa; }
+
         .section { display: none; }
         .section.active { display: block; }
+        .sub-section { display: none; }
+        .sub-section.active { display: block; }
 
-        /* Drop Zone */
         #drop-zone {
-            border: 3px dashed #4a90d9; border-radius: 12px; padding: 40px;
-            text-align: center; background: rgba(74, 144, 217, 0.1);
-            transition: all 0.3s; cursor: pointer; margin-bottom: 20px;
+            border: 2px dashed #4a5568; border-radius: 12px; padding: 40px 20px;
+            text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
         }
         #drop-zone.dragover { background: rgba(74, 144, 217, 0.2); border-color: #66a3ff; transform: scale(1.02); }
         #drop-zone p { font-size: 1.2em; }
         #drop-zone .hint { font-size: 0.8em; color: #888; margin-top: 6px; }
 
-        /* Preview */
         #preview-container { display: none; text-align: center; margin-bottom: 20px; }
-        #preview-image { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 10px; }
-
-        /* Progress bar */
-        #progress-container { display: none; margin-bottom: 25px; }
+        #preview-image { max-width: 300px; max-height: 300px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+        #progress-container { display: none; margin: 20px 0; }
         #progress-track { background: #334155; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
-        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #4a90d9, #66a3ff); transition: width 0.4s ease; border-radius: 8px; }
-        #progress-fill.pulsing { animation: pulse 1.8s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        #progress-label { text-align: center; color: #94a3b8; font-size: 0.9em; margin-bottom: 4px; }
-        .progress-steps { display: flex; justify-content: space-between; font-size: 0.75em; color: #475569; }
+        #progress-fill { height: 100%; background: linear-gradient(90deg, #4a90d9, #66a3ff); transition: width 0.4s ease; border-radius: 8px; width: 0%; }
+        #progress-label { text-align: center; margin-bottom: 8px; color: #94a3b8; font-size: 0.9em; }
+        .progress-steps { display: flex; justify-content: center; gap: 15px; font-size: 0.8em; color: #64748b; }
         .progress-steps .step.active { color: #66a3ff; font-weight: 600; }
         .progress-steps .step.done { color: #4ade80; }
 
-        /* Results */
-        #search-results { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; }
-
-        .candidate-row { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .candidate-row:hover { background: rgba(74,144,217,0.15); }
-        .candidate-row.selected { background: rgba(74,144,217,0.25); border-color: #4a90d9; }
-        .candidate-thumb { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #334155; }
+        #search-results { display: none; margin-top: 20px; }
+        .candidate-row {
+            display: flex; align-items: center; gap: 15px; padding: 12px; margin-bottom: 8px;
+            background: rgba(255,255,255,0.04); border-radius: 8px; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; border: 2px solid transparent;
+        }
+        .candidate-row:hover { background: rgba(74,144,217,0.1); }
+        .candidate-row.selected { border-color: #4a90d9; background: rgba(74,144,217,0.15); }
+        .candidate-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
         .candidate-thumb[src=""] { display: none; }
-        .candidate-info { flex: 1; min-width: 0; }
-        .candidate-artist { font-weight: 600; color: #e2e8f0; }
-        .candidate-title { color: #66a3ff; font-size: 0.95em; }
-        .candidate-year { color: #818cf8; font-size: 0.8em; margin-top: 2px; }
-        .match-pct { color: #4ade80; font-size: 0.85em; font-weight: 600; margin-left: 8px; }
-        .index-badge { display: inline-block; background: rgba(74, 222, 128, 0.15); color: #4ade80; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
-        .index-badge.ai-badge { background: rgba(129, 140, 248, 0.2); color: #a5b4fc; }
-        .qwen-row { border-color: rgba(129, 140, 248, 0.3) !important; }
-        .selected-label { color: #4ade80; font-size: 0.8em; font-weight: 600; margin-left: 10px; }
-
-        /* Metadata */
-        #metadata-display { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; margin-top: 20px; }
-        #metadata-display h3 { color: #4a90d9; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 1em; }
-        .metadata-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .metadata-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; }
-        .metadata-item .label { color: #888; font-size: 0.8em; display: block; margin-bottom: 5px; }
-        .metadata-item .value { color: #fff; }
-
-        /* Form */
-        .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; color: #aaa; font-size: 0.9em; }
-        input, select {
-            width: 100%; padding: 10px; border-radius: 6px;
-            border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1em;
-        }
-        button {
-            background: linear-gradient(135deg, #4a90d9, #357abd);
-            color: white; border: none; padding: 12px 24px;
-            border-radius: 6px; cursor: pointer; font-size: 1em; margin: 5px;
-            transition: all 0.3s;
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,144,217,0.4); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .batch-mode-btn { width: 100%; margin: 8px 0; padding: 20px; font-size: 1.1em; border-radius: 10px; text-align: center; line-height: 1.5; }
-
-        .error { background: rgba(239,68,68,0.2); border-left: 4px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 6px; margin: 10px 0; }
-        .warning { background: rgba(250,204,21,0.15); border-left: 4px solid #eab308; color: #fde68a; padding: 12px 15px; border-radius: 6px; margin: 10px 0; font-size: 0.9em; }
-        .success { background: rgba(74,144,217,0.2); border-left: 4px solid #4a90d9; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        .cand-info { flex: 1; }
+        .cand-title { font-weight: 600; }
+        .cand-artist { color: #94a3b8; font-size: 0.85em; }
+        .cand-meta { color: #64748b; font-size: 0.8em; margin-top: 2px; }
+        .similarity-badge { background: rgba(74,144,217,0.2); color: #66a3ff; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; white-space: nowrap; }
+        .selected-label { display: none; font-size: 0.75em; color: #4ade80; margin-top: 4px; }
 
         #fallback-search { display: none; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        .fallback-row { display: flex; gap: 10px; margin: 15px 0; }
-        .fallback-row input { flex: 1; }
-        #fallback-message { color: #fbbf24; font-size: 0.9em; margin-bottom: 10px; }
+        .fallback-row { display: flex; gap: 10px; margin: 10px 0; }
+        .fallback-row input { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid #4a5568; border-radius: 6px; padding: 10px; color: #fff; }
+        .fallback-row input:focus { outline: none; border-color: #4a90d9; }
 
-        /* Catalog Styles */
-        .catalog-stats-bar {
-            display: flex; justify-content: space-around; align-items: center;
-            padding: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+        #metadata-display { display: none; margin-top: 20px; }
+        .metadata-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+        .metadata-grid .label { color: #94a3b8; font-size: 0.85em; }
+
+        .hint-input {
+            width: 100%; background: rgba(255,255,255,0.06); border: 1px solid #4a5568;
+            border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 0.9em; margin-bottom: 15px;
         }
-        .catalog-stats-bar .stat { color: #94a3b8; font-size: 0.85em; text-align: center; }
-        .catalog-stats-bar .stat strong { color: #fff; display: block; font-size: 1.3em; margin-top: 2px; }
+        .hint-input:focus { outline: none; border-color: #8b5cf6; }
+        .hint-input::placeholder { color: #64748b; }
 
-        .catalog-toolbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 16px; gap: 10px; flex-wrap: wrap;
+        .section-area { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+        .section-area > p { margin-bottom: 12px; color: #94a3b8; }
+        .file-input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .file-input-row input[type="file"] { color: #94a3b8; flex: 1; min-width: 200px; }
+        .file-input-row input[type="file"]::file-selector-button {
+            background: #4a5568; color: #fff; border: none; border-radius: 4px;
+            padding: 8px 16px; cursor: pointer; margin-right: 10px;
         }
-        .view-toggle { display: flex; gap: 0; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; }
-        .view-toggle button {
-            padding: 8px 18px; border: none; background: transparent; color: #94a3b8;
-            cursor: pointer; font-size: 0.85em; transition: all 0.2s; margin: 0; border-radius: 0;
+        .file-input-row input[type="file"]::file-selector-button:hover { background: #5a6a7e; }
+        .process-btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1em; color: #fff; }
+        .process-btn:hover { filter: brightness(1.1); }
+
+        .section-progress { display: none; margin: 15px 0; text-align: center; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+        .section-progress .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #4a5568; border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .section-progress .status-text { color: #cbd5e1; font-size: 0.95em; vertical-align: middle; }
+        .section-error { color: #ef4444; margin: 10px 0; font-size: 0.9em; display: none; padding: 10px; background: rgba(239,68,68,0.1); border-radius: 6px; }
+
+        .result-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px;
+            background: rgba(255,255,255,0.04); border-radius: 6px; margin-bottom: 6px;
         }
-        .view-toggle button:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .view-toggle button.active { background: rgba(74,144,217,0.2); color: #66a3ff; box-shadow: none; }
-        #cat-search {
-            padding: 8px 14px; border-radius: 8px; border: 1px solid #334155;
-            background: #0f172a; color: #fff; font-size: 0.85em; width: 220px;
+        .result-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .result-thumb[src=""] { display: none; }
+        .result-info { flex: 1; }
+        .result-artist { color: #94a3b8; font-size: 0.85em; }
+        .result-title { font-weight: 600; }
+        .result-mbid { color: #64748b; font-size: 0.75em; }
+        .result-status { font-size: 0.8em; color: #4ade80; }
+        .catalog-sm-btn {
+            background: #4a90d9; color: #fff; border: none; border-radius: 4px;
+            padding: 6px 12px; cursor: pointer; font-size: 0.8em; font-weight: 600;
         }
+        .catalog-sm-btn:hover { background: #357abd; }
 
-        .cat-empty { text-align: center; padding: 60px 20px; color: #64748b; }
-        .cat-empty strong { color: #94a3b8; }
+        button { cursor: pointer; font-family: inherit; }
+        .btn-primary { background: #4a90d9; color: #fff; border: none; border-radius: 6px; padding: 10px 20px; font-weight: 600; font-size: 1em; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-primary:disabled { opacity: 0.5; cursor: default; }
+        .btn-secondary { background: #475569; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500; }
+        .btn-secondary:hover { background: #5a6a7e; }
+        .error { color: #ef4444; font-size: 0.85em; display: none; }
 
-        /* Grid */
-        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-        .grid-card { background: rgba(255,255,255,0.04); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.25s; }
-        .grid-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.4); background: rgba(255,255,255,0.08); }
-        .grid-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #0f172a; }
-        .grid-card .body { padding: 10px 12px 12px; }
-        .grid-card .artist { font-weight: 600; font-size: 0.8em; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .grid-card .title { color: #66a3ff; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-        .grid-card .price { color: #4ade80; font-size: 0.85em; font-weight: 700; margin-top: 5px; }
-
-        /* List */
-        .catalog-list { display: flex; flex-direction: column; gap: 12px; }
-        .list-item { display: flex; gap: 16px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; align-items: stretch; }
-        .list-item:hover { background: rgba(74,144,217,0.1); }
-        .list-item img { width: 110px; height: 110px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #0f172a; }
-        .list-item .body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
-        .list-item .artist { font-weight: 600; color: #e2e8f0; font-size: 0.95em; }
-        .list-item .title { color: #66a3ff; font-size: 0.9em; }
-        .list-item .meta { color: #94a3b8; font-size: 0.8em; margin-top: 3px; }
-        .list-item .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-        .list-item .tag { background: rgba(74,144,217,0.15); color: #66a3ff; font-size: 0.7em; padding: 2px 10px; border-radius: 10px; }
-        .list-item .info-text { color: #94a3b8; font-size: 0.8em; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .list-item .price-col { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; min-width: 90px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.06); }
-        .list-item .price-col .amt { color: #4ade80; font-size: 1.2em; font-weight: 700; }
-        .list-item .price-col .lbl { color: #64748b; font-size: 0.7em; }
-
-        /* Modal */
         .modal-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
             z-index: 100; justify-content: center; align-items: center; padding: 20px; overflow-y: auto;
@@ -167,72 +136,106 @@
             border-radius: 14px; max-width: 580px; width: 100%; margin: auto;
             padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative;
         }
-        .modal-close {
-            position: absolute; top: 12px; right: 16px;
-            background: none; border: none; color: #64748b; font-size: 1.8em; cursor: pointer; line-height: 1;
+        .modal h3 { margin-bottom: 15px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; color: #94a3b8; font-size: 0.85em; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            width: 100%; background: rgba(255,255,255,0.08); border: 1px solid #4a5568;
+            border-radius: 6px; padding: 10px; color: #fff;
         }
-        .modal-close:hover { color: #fff; }
-        .modal .cover { width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; margin-bottom: 18px; background: #0f172a; }
-        .modal h2 { font-size: 1.3em; margin-bottom: 2px; }
-        .modal .sub { color: #94a3b8; margin-bottom: 16px; font-size: 0.9em; }
-        .modal .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .modal .ditem { background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 6px; }
-        .modal .ditem .lbl { color: #64748b; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; }
-        .modal .ditem .val { color: #e2e8f0; font-size: 0.9em; margin-top: 2px; }
-        .modal .ditem .val a { color: #66a3ff; text-decoration: none; }
-        .modal .ditem .val a:hover { text-decoration: underline; }
-        .modal .info-block {
-            background: rgba(255,255,255,0.03); padding: 16px; border-radius: 8px;
-            margin-bottom: 16px; color: #cbd5e1; font-size: 0.9em; line-height: 1.6;
-        }
-        .modal .info-block .lbl { color: #64748b; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .modal .price-block {
-            background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
-            padding: 14px; border-radius: 8px; text-align: center;
-        }
-        .modal .price-block .amt { color: #4ade80; font-size: 1.5em; font-weight: 700; }
-        .modal .price-block .lbl { color: #64748b; font-size: 0.75em; }
-        .modal .price-block .range { color: #94a3b8; font-size: 0.85em; margin-top: 4px; }
-        .modal .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
-        .modal .tag { background: rgba(74,144,217,0.15); color: #66a3ff; font-size: 0.75em; padding: 3px 12px; border-radius: 12px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4a90d9; }
+        .form-group select option { background: #1a1a2e; color: #fff; }
 
-        .empty-catalog { text-align: center; padding: 80px 20px; color: #64748b; }
-        .empty-catalog strong { color: #94a3b8; display: block; font-size: 1.2em; margin-bottom: 6px; }
+        #catalog-btn { width: 100%; background: linear-gradient(135deg, #4a90d9, #357abd); color: #fff; border: none; border-radius: 6px; padding: 12px; font-size: 1em; font-weight: 600; margin: 10px 0; }
+        #catalog-btn:disabled { opacity: 0.5; cursor: default; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 12px; }
+        .modal-footer button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; }
+
+        .catalog-stats-bar { display: flex; gap: 20px; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.04); border-radius: 10px; }
+        .catalog-stats-bar .stat { color: #94a3b8; font-size: 0.85em; }
+        .catalog-stats-bar .stat strong { color: #fff; font-size: 1.2em; }
+        .catalog-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .catalog-search-input {
+            flex: 1; background: rgba(255,255,255,0.08); border: 1px solid #4a5568;
+            border-radius: 6px; padding: 10px; color: #fff;
+        }
+        .catalog-search-input:focus { outline: none; border-color: #4a90d9; }
+        .view-toggle { display: flex; gap: 0; }
+        .view-toggle button {
+            padding: 8px 14px; border: 1px solid #4a5568; background: transparent; color: #94a3b8;
+            cursor: pointer; font-size: 0.85em;
+        }
+        .view-toggle button:first-child { border-radius: 6px 0 0 6px; }
+        .view-toggle button:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+        .view-toggle button.active { background: rgba(74,144,217,0.2); color: #66a3ff; border-color: #4a90d9; }
+
+        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .grid-card { background: rgba(255,255,255,0.04); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+        .grid-card:hover { transform: translateY(-4px); }
+        .grid-card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+        .grid-card .grid-info { padding: 8px; }
+        .grid-card .grid-artist { font-weight: 600; font-size: 0.8em; }
+        .grid-card .grid-title { color: #94a3b8; font-size: 0.75em; margin-top: 2px; }
+        .grid-card .grid-condition { display: inline-block; background: rgba(74,144,217,0.2); color: #66a3ff; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-top: 4px; }
+
+        .catalog-list { display: flex; flex-direction: column; gap: 6px; }
+        .list-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .list-item:hover { background: rgba(74,144,217,0.08); }
+        .list-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; }
+        .list-info { flex: 1; }
+        .list-artist { font-weight: 600; }
+        .list-title { color: #94a3b8; font-size: 0.85em; }
+        .list-meta { color: #64748b; font-size: 0.75em; margin-top: 2px; }
+
+        .detail-cover { max-width: 250px; max-height: 250px; border-radius: 8px; margin-bottom: 12px; }
+        .detail-section-title { color: #94a3b8; font-size: 0.85em; font-weight: 600; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .detail-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+        .detail-tag { background: rgba(74,144,217,0.15); color: #93c5fd; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; }
+        .detail-link { color: #60a5fa; text-decoration: none; font-size: 0.85em; }
+        .detail-link:hover { text-decoration: underline; }
+
+        .qwen-row { border-color: rgba(129, 140, 248, 0.3) !important; }
+
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .results-header h3 { margin: 0; }
 
         @media (max-width: 600px) {
-            .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-            .list-item { flex-wrap: wrap; }
-            .list-item img { width: 80px; height: 80px; }
-            .list-item .price-col { border-left: none; border-top: 1px solid rgba(255,255,255,0.06); padding-left: 0; padding-top: 8px; min-width: 100%; flex-direction: row; justify-content: space-between; }
-            .modal .dgrid { grid-template-columns: 1fr; }
-            .catalog-toolbar { flex-direction: column; align-items: stretch; }
-            #cat-search { width: 100%; }
+            .fallback-row { flex-direction: column; }
+            .metadata-grid { grid-template-columns: 1fr; }
+            .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+            .file-input-row { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Vinyl-Vision</h1>
-        <p class="subtitle">Drop album art → Identify → Catalog → Browse</p>
+<div class="container">
+    <h1>Vinyl-Vision</h1>
+    <p class="subtitle">Drop album art → Identify → Catalog → Browse <span id="ver" style="font-size:0.7em;color:#ff6b6b;">v3</span></p>
 
-        <!-- Tab bar -->
-        <div class="tab-bar">
-            <button class="tab active" data-tab="search">&#x1F50D; Search</button>
-            <button class="tab" data-tab="catalog">&#x1F4DA; Catalog</button>
-        </div>
+    <div class="tab-bar">
+        <button class="tab active" data-tab="search">🔍 Search</button>
+        <button class="tab" data-tab="catalog">📖 Catalog</button>
+    </div>
 
-        <!-- ── Search Section ── -->
-        <div class="section active" id="section-search">
+    <div class="sub-tab-bar" id="sub-tab-bar">
+        <button class="sub-tab active" data-subtab="single">📀 Single Album</button>
+        <button class="sub-tab" data-subtab="batch">📚 Batch Upload</button>
+        <button class="sub-tab" data-subtab="group">🖼️ Group Photo</button>
+    </div>
+
+    <div class="section active" id="section-search">
+
+        <div class="sub-section active" id="sub-single">
+            <input type="text" id="single-hint" class="hint-input" placeholder="Optional: describe the photo for better recognition (e.g. 'jazz album from the 60s')">
             <div id="drop-zone">
                 <p><strong>Drag & drop an album cover image here</strong></p>
                 <p class="hint">or click to browse</p>
-                <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;" />
+                <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none;">
             </div>
-
             <div id="preview-container">
-                <img id="preview-image" alt="Album preview" />
+                <img id="preview-image" alt="Album preview">
                 <div id="progress-container">
-                    <div id="progress-track"><div id="progress-fill"></div></div>
+                    <div id="track-single"><div id="fill-single" style="width:0%;height:100%;background:linear-gradient(90deg,#4a90d9,#66a3ff);transition:width 0.4s ease;border-radius:8px;"></div></div>
                     <div id="progress-label">Analyzing cover art...</div>
                     <div class="progress-steps">
                         <span class="step" id="step-analyze">Analyze</span>
@@ -242,906 +245,663 @@
                     </div>
                 </div>
             </div>
-
             <div id="search-results"></div>
-
-            <!-- Metadata Display Section -->
             <div id="metadata-display" style="display:none;">
                 <h3>Select a Candidate to Catalog</h3>
-                <p style="color:#64748b;margin-bottom:15px;">Click on any result above, then use the form below to catalog.</p>
+                <p style="color:#64748b;margin-bottom:15px;">Click on any result above, then catalog below.</p>
                 <div class="metadata-grid" id="metadata-display-grid"></div>
+                <button class="btn-primary" id="open-catalog-btn" style="margin-top:10px;">📋 Open Catalog Form</button>
             </div>
-
             <div id="fallback-search">
                 <div id="fallback-message">Could not auto-identify the album.</div>
-                <p style="color:#aaa; font-size:0.9em;">Enter artist & title to search MusicBrainz:</p>
+                <p style="color:#aaa;font-size:0.9em;">Enter artist & title to search MusicBrainz:</p>
                 <div class="fallback-row">
-                    <input type="text" id="fb-artist" placeholder="Artist name" />
-                    <input type="text" id="fb-title" placeholder="Album title" />
+                    <input type="text" id="fb-artist" placeholder="Artist name">
+                    <input type="text" id="fb-title" placeholder="Album title">
                 </div>
-                <button id="fb-search-btn">Search MusicBrainz</button>
-                <button onclick="toggleBatchModal()" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:10px;">📂 Batch Upload (5-10 photos)</button>
-                <div class="error" id="fb-error" style="display:none;"></div>
-            </div>
-
-            <!-- ── Detail Modal / Batch Upload Modal (Single overlay) ── -->
-            <div class="modal-overlay" id="detail-modal">
-                <!-- Batch Upload Mode -->
-                <div class="modal-content batch-modal-content" id="batch-modal-content">
-                    <div id="batch-mode-select">
-                        <h3>📂 Batch Upload</h3>
-                        <p style="color:#64748b;margin-bottom:20px;">Choose a mode:</p>
-                        <button onclick="showMultiFileMode()" class="batch-mode-btn" style="background:linear-gradient(135deg,#4a90d9,#357abd);">
-                            📸 Multiple photos<br><small style="font-weight:normal;">Upload 5-10 individual album photos</small>
-                        </button>
-                        <button onclick="showSinglePhotoMode()" class="batch-mode-btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">
-                            🖼️ One photo, many albums<br><small style="font-weight:normal;">Take a group photo of multiple albums</small>
-                        </button>
-                        <button onclick="closeDetail()" style="margin-top:15px;background:#334155;">Cancel</button>
-                    </div>
-
-                    <div id="batch-multi-file" style="display:none;">
-                        <h3>📸 Upload Multiple Photos</h3>
-                        <p>Select 5-10 photos to process as a batch</p>
-                        <input type="file" id="batch-files" multiple accept="image/*" style="width:100%;margin-top:15px;">
-
-                        <div id="batch-progress" style="display:none;margin:20px 0;">
-                            <div id="progress-track">
-                                <div id="progress-fill" style="width:0%"></div>
-                            </div>
-                            <div class="progress-steps">
-                                <span class="step active" id="batch-step-1">Selecting files</span>
-                                <span class="step done" id="batch-step-2">Processing...</span>
-                                <span class="step" id="batch-step-3">Review results</span>
-                            </div>
-                            <p style="text-align:center;margin-top:10px;"><strong id="batch-progress-text">Ready</strong></p>
-                        </div>
-
-                        <button onclick="processBatch()" id="batch-start-btn" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);margin-top:15px;padding:12px 30px;font-size:16px;">🚀 Process Batch</button>
-                        <button onclick="showBatchModeSelect()" style="background:#334155;margin-top:10px;">← Back</button>
-                    </div>
-
-                    <div id="batch-single-photo" style="display:none;">
-                        <h3>🖼️ One Photo, Many Albums</h3>
-                        <p>Take or select a photo showing multiple albums. Qwen AI will identify each one.</p>
-                        <input type="file" id="multi-photo-file" accept="image/*" capture="environment" style="width:100%;margin-top:15px;">
-
-                        <div id="single-progress" style="display:none;margin:20px 0;">
-                            <p style="text-align:center;"><strong id="single-progress-text">Analyzing photo...</strong></p>
-                        </div>
-
-                        <button onclick="processMultiPhoto()" id="single-start-btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed);margin-top:15px;padding:12px 30px;font-size:16px;">🔍 Find Albums</button>
-                        <button onclick="showBatchModeSelect()" style="background:#334155;margin-top:10px;">← Back</button>
-                    </div>
-
-                    <!-- Detail Mode (shown after selection) -->
-                    <div class="modal-content detail-modal-content" id="detail-modal-content">
-                        <h3>Full Metadata (Ready to Catalog)</h3>
-                        <div class="metadata-grid" id="metadata-grid"></div>
-                        <div class="form-group">
-                            <label>Additional Notes (optional)</label>
-                            <input type="text" id="notes" placeholder="Collection notes…" />
-                        </div>
-                        <div class="form-group">
-                            <label>Condition Grade</label>
-                            <select id="condition">
-                                <option value="NM">Near Mint (NM)</option>
-                                <option value="M">Mint (M)</option>
-                                <option value="EX">Excellent (EX)</option>
-                                <option value="VG">Very Good (VG)</option>
-                                <option value="GD">Good (GD)</option>
-                                <option value="FAIR">Fair</option>
-                                <option value="POOR">Poor</option>
-                            </select>
-                        </div>
-                        <button id="catalog-btn" disabled>Catalog This Release</button>
-                        <button onclick="resetForm()">Another Image</button>
-                    </div>
-                </div>
-
-                <!-- Catalog Stats (shown after upload) -->
-                <div class="modal-content catalog-stats-content" id="catalog-stats-content" style="display:none;">
-                    <h3>Catalog Update Complete</h3>
-                    <div id="catalog-stats">
-                        <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
-                    </div>
-                    <button onclick="closeDetail()" style="margin-top:20px;">Close & View Catalog</button>
-                </div>
+                <button id="fb-search-btn" class="btn-primary">Search MusicBrainz</button>
+                <div class="error" id="fb-error"></div>
             </div>
         </div>
 
-        <!-- ── Catalog Section ── -->
-        <div class="section" id="section-catalog">
-            <div class="catalog-stats-bar" id="catalog-stats-bar">
-                <span class="stat">Albums<div><strong id="cat-count">0</strong></div></span>
-                <span class="stat">Genres<div><strong id="cat-genres">&#8212;</strong></div></span>
-                <span class="stat">Est. Value<div><strong id="cat-value">&#8212;</strong></div></span>
-            </div>
-
-            <div class="catalog-toolbar">
-                <input type="text" id="cat-search" class="catalog-search-input" placeholder="Filter by artist, title, genre..." />
-                <div class="view-toggle">
-                    <button id="view-grid" class="active">&#9762; Grid</button>
-                    <button id="view-list">&#9774; List</button>
+        <div class="sub-section" id="sub-batch">
+            <div class="section-area">
+                <p>Upload multiple individual album cover images. Each will be analyzed and matched against MusicBrainz.</p>
+                <input type="text" id="batch-hint" class="hint-input" placeholder="Optional: describe the batch (e.g. 'collection of classic rock albums')">
+                <div class="file-input-row">
+                    <input type="file" id="batch-files" multiple accept="image/*">
+                    <button id="batch-process-btn" class="process-btn" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);">🚀 Process Batch</button>
                 </div>
+                <div class="section-progress" id="batch-progress">
+                    <span class="spinner"></span>
+                    <span class="status-text" id="batch-status">Processing...</span>
+                </div>
+                <div class="section-error" id="batch-error"></div>
+                <div id="batch-results" style="display:none;margin-top:15px;"></div>
             </div>
+        </div>
 
-            <div id="catalog-albums"></div>
+        <div class="sub-section" id="sub-group">
+            <div class="section-area">
+                <p>Take or select a single photo showing MULTIPLE albums. Qwen AI will identify each cover individually.</p>
+                <input type="text" id="group-hint" class="hint-input" placeholder="Optional: describe the scene (e.g. 'vinyl records on a shelf, mostly jazz')">
+                <div class="file-input-row">
+                    <input type="file" id="group-file" accept="image/*" capture="environment">
+                    <button id="group-process-btn" class="process-btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">🔍 Find Albums</button>
+                </div>
+                <div class="section-progress" id="group-progress">
+                    <span class="spinner"></span>
+                    <span class="status-text" id="group-status">Analyzing photo...</span>
+                </div>
+                <div class="section-error" id="group-error"></div>
+                <div id="group-results" style="display:none;margin-top:15px;"></div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const API = '/';
-        let currentFile = null;
-        let candidates  = [];
-        let selectedMbid = null;
-        let currentQwenMeta = null;
-        let progressTimer = null;
-        let catalogData = [];
-        let currentView = 'grid';
+    <div class="section" id="section-catalog">
+        <div class="catalog-stats-bar" id="catalog-stats-bar">
+            <span class="stat">Albums<div><strong id="cat-count">0</strong></div></span>
+            <span class="stat">Genres<div><strong id="cat-genres">—</strong></div></span>
+            <span class="stat">Est. Value<div><strong id="cat-value">—</strong></div></span>
+        </div>
+        <div class="catalog-toolbar">
+            <input type="text" id="cat-search" class="catalog-search-input" placeholder="Search catalog...">
+            <div class="view-toggle">
+                <button id="view-grid" class="active">Grid</button>
+                <button id="view-list">List</button>
+            </div>
+        </div>
+        <div id="catalog-albums"></div>
+    </div>
 
-        // ── Tab switching ──
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById('section-' + tab.dataset.tab).classList.add('active');
-                if (tab.dataset.tab === 'catalog') loadCatalog();
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal" id="catalog-form-section">
+            <h3 id="catalog-form-title">Full Metadata (Ready to Catalog)</h3>
+            <div id="detail-content"></div>
+            <div id="catalog-form-fields">
+                <div class="metadata-grid" id="metadata-grid"></div>
+                <div class="form-group">
+                    <label>Additional Notes (optional)</label>
+                    <input type="text" id="notes" placeholder="Collection notes...">
+                </div>
+                <div class="form-group">
+                    <label>Condition Grade</label>
+                    <select id="condition">
+                        <option value="NM">Near Mint (NM)</option>
+                        <option value="M">Mint (M)</option>
+                        <option value="EX">Excellent (EX)</option>
+                        <option value="VG">Very Good (VG)</option>
+                        <option value="GD">Good (GD)</option>
+                        <option value="FAIR">Fair</option>
+                        <option value="POOR">Poor</option>
+                    </select>
+                </div>
+                <button id="catalog-btn" disabled>Catalog This Release</button>
+                <button class="btn-secondary" onclick="closeDetail();resetForm();">Another Image</button>
+            </div>
+        </div>
+        <div class="modal" id="catalog-stats-section" style="display:none;">
+            <h3>Catalog Update Complete</h3>
+            <p><strong>Albums cataloged:</strong> <span id="album-count">0</span></p>
+            <button class="btn-primary" onclick="closeDetail()" style="margin-top:15px;">Close & View Catalog</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '/';
+let currentFile = null;
+let candidates = [];
+let selectedMbid = '';
+let catalogData = [];
+let currentView = 'grid';
+
+function escapeHtml(t) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(t));
+    return d.innerHTML;
+}
+
+function fmtPct(v) { return Math.round((v || 0) * 100) + '% match'; }
+
+function fmtPrice(p) {
+    if (!p) return '—';
+    if (p.avg) return '$' + p.avg.toFixed(2);
+    if (p.min && p.max) return '$' + p.min.toFixed(2) + ' – $' + p.max.toFixed(2);
+    return '—';
+}
+
+function fileToB64(file) {
+    return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+    });
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'catalog') loadCatalog();
+    });
+});
+
+document.querySelectorAll('.sub-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('sub-' + tab.dataset.subtab).classList.add('active');
+    });
+});
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+function startProgress() {
+    const pc = document.getElementById('progress-container');
+    pc.style.display = 'block';
+    document.getElementById('fill-single').style.width = '5%';
+    document.getElementById('progress-label').textContent = 'Analyzing cover art...';
+    document.querySelectorAll('#progress-container .step').forEach(s => { s.classList.remove('active', 'done'); });
+    document.getElementById('step-analyze').classList.add('active');
+    setTimeout(() => {
+        document.getElementById('step-analyze').classList.remove('active');
+        document.getElementById('step-analyze').classList.add('done');
+        document.getElementById('step-search').classList.add('active');
+        document.getElementById('fill-single').style.width = '40%';
+    }, 4000);
+    setTimeout(() => {
+        document.getElementById('step-search').classList.remove('active');
+        document.getElementById('step-search').classList.add('done');
+        document.getElementById('step-rank').classList.add('active');
+        document.getElementById('fill-single').style.width = '75%';
+    }, 6000);
+}
+
+function completeProgress() {
+    document.getElementById('fill-single').style.width = '100%';
+    document.querySelectorAll('#progress-container .step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+    document.getElementById('progress-label').textContent = 'Complete';
+}
+
+async function handleFile(file) {
+    if (!file) return;
+    currentFile = file;
+    selectedMbid = '';
+    document.getElementById('catalog-btn').disabled = true;
+    document.getElementById('fallback-search').style.display = 'none';
+    document.getElementById('metadata-display').style.display = 'none';
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-results').style.display = 'none';
+    const b64 = await fileToB64(file);
+    document.getElementById('preview-image').src = b64;
+    document.getElementById('preview-container').style.display = 'block';
+    startProgress();
+    const fd = new FormData();
+    fd.append('image', file);
+    const hint = document.getElementById('single-hint').value.trim();
+    if (hint) fd.append('hint', hint);
+    try {
+        const res = await fetch(API + 'search', { method: 'POST', body: fd });
+        const data = await res.json();
+        completeProgress();
+        handleSearchResponse(data);
+    } catch (e) {
+        completeProgress();
+        document.getElementById('progress-label').textContent = 'Error';
+        document.getElementById('fallback-search').style.display = 'block';
+        document.getElementById('fallback-message').textContent = 'Network error: ' + e.message;
+    }
+}
+
+function handleSearchResponse(data) {
+    if (data.candidates && data.candidates.length > 0) {
+        if (data.qwen_meta) {
+            data.candidates.unshift({
+                mbid: '', artist: data.qwen_meta.artist, title: data.qwen_meta.title,
+                similarity: 0, year: '', cover_url: '', _qwen: true,
             });
-        });
-
-        // ── Search ──
-        const dropZone  = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-        dropZone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-        document.getElementById('fb-search-btn').addEventListener('click', doFallbackSearch);
-        document.getElementById('fb-artist').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
-        document.getElementById('fb-title').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
-        document.getElementById('catalog-btn').addEventListener('click', doCatalog);
-
-        document.getElementById('cat-search').addEventListener('input', renderCatalog);
-
-        document.getElementById('view-grid').addEventListener('click', () => {
-            currentView = 'grid';
-            document.getElementById('view-grid').classList.add('active');
-            document.getElementById('view-list').classList.remove('active');
-            renderCatalog();
-        });
-        document.getElementById('view-list').addEventListener('click', () => {
-            currentView = 'list';
-            document.getElementById('view-list').classList.add('active');
-            document.getElementById('view-grid').classList.remove('active');
-            renderCatalog();
-            });
-
-
-        function fmtPct(v) {
-            if (v == null) return '';
-            return Math.round(v * 100) + '% match';
         }
-
-        function fmtPrice(p) {
-            if (!p) return null;
-            if (p.avg) return '$' + Number(p.avg).toFixed(2);
-            if (p.min && p.max) return '$' + Number(p.min).toFixed(0) + ' – $' + Number(p.max).toFixed(0);
-            return null;
+        showCandidates(data.candidates);
+    } else {
+        document.getElementById('fallback-search').style.display = 'block';
+        document.getElementById('fallback-message').textContent = data.message || 'Could not identify the album.';
+        if (data.qwen_meta) {
+            document.getElementById('fb-artist').value = data.qwen_meta.artist || '';
+            document.getElementById('fb-title').value = data.qwen_meta.title || '';
         }
+    }
+}
 
-        function fmtPriceRange(p) {
-            if (!p) return null;
-            const parts = [];
-            if (p.min) parts.push('Min: $' + Number(p.min).toFixed(2));
-            if (p.max) parts.push('Max: $' + Number(p.max).toFixed(2));
-            if (p.avg) parts.push('Avg: $' + Number(p.avg).toFixed(2));
-            return parts.join(' | ');
-        }
+function showCandidates(list) {
+    candidates = list;
+    const container = document.getElementById('search-results');
+    container.innerHTML = '';
+    container.style.display = 'block';
+    document.getElementById('metadata-display').style.display = 'none';
+    list.forEach((c, i) => {
+        const isQwen = c._qwen;
+        const row = document.createElement('div');
+        row.className = 'candidate-row' + (isQwen ? ' qwen-row' : '');
+        row.innerHTML = '<img class="candidate-thumb" src="' + (c.cover_url || '') + '" alt="">' +
+            '<div class="cand-info">' +
+                '<div class="cand-title">' + escapeHtml(c.title) + '</div>' +
+                '<div class="cand-artist">' + escapeHtml(c.artist) + '</div>' +
+                '<div class="cand-meta">' + (c.year || '') + (c.mbid ? ' · ' + c.mbid.slice(0, 8) : '') + '</div>' +
+                (isQwen ? '<div class="selected-label" style="display:block;color:#818cf8;">AI suggested</div>' : '') +
+            '</div>' +
+            (c.similarity > 0
+                ? '<div class="similarity-badge">' + fmtPct(c.similarity) + '</div>'
+                : '<div class="similarity-badge" style="background:rgba(129,140,248,0.2);color:#818cf8;">AI</div>');
+        row.addEventListener('click', () => selectCandidate(row, c));
+        container.appendChild(row);
+    });
+}
 
-        // ── Progress ──
-        function startProgress() {
-            const fill = document.getElementById('progress-fill');
-            const label = document.getElementById('progress-label');
-            const steps = ['step-analyze', 'step-search', 'step-rank', 'step-done'];
-            fill.style.width = '0%';
-            fill.classList.remove('pulsing');
-            steps.forEach(id => document.getElementById(id).className = 'step');
-            document.getElementById('progress-container').style.display = 'block';
-            label.textContent = 'Analyzing cover art...';
-            document.getElementById(steps[0]).className = 'step active';
-            if (progressTimer) clearInterval(progressTimer);
-            progressTimer = setTimeout(() => {
-                fill.style.width = '30%';
-                fill.classList.add('pulsing');
-                label.textContent = 'Waiting on AI analysis...';
-                document.getElementById(steps[1]).className = 'step active';
-            }, 4000);
-        }
+function selectCandidate(row, candidate) {
+    document.querySelectorAll('.candidate-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    selectedMbid = candidate.mbid || '';
+    const grid = document.getElementById('metadata-display-grid');
+    grid.innerHTML = '<span class="label">Artist</span><span>' + escapeHtml(candidate.artist) + '</span>' +
+        '<span class="label">Title</span><span>' + escapeHtml(candidate.title) + '</span>' +
+        '<span class="label">Year</span><span>' + (candidate.year || '—') + '</span>' +
+        (candidate.mbid ? '<span class="label">MBID</span><span style="font-size:0.8em;">' + candidate.mbid + '</span>' : '');
+    document.getElementById('metadata-display').style.display = 'block';
+    window._catalogTarget = { candidate: candidate, file: currentFile };
+}
 
-        function completeProgress() {
-            const fill = document.getElementById('progress-fill');
-            const label = document.getElementById('progress-label');
-            const steps = ['step-analyze', 'step-search', 'step-rank', 'step-done'];
-            fill.style.width = '100%';
-            fill.classList.remove('pulsing');
-            label.textContent = 'Done!';
-            steps.forEach(id => document.getElementById(id).className = 'step done');
-            if (progressTimer) clearInterval(progressTimer);
-        }
+document.getElementById('open-catalog-btn').addEventListener('click', () => {
+    openCatalogFormModal(window._catalogTarget);
+});
 
-        async function fileToB64(file) {
-            return new Promise((resolve, reject) => {
-                const r = new FileReader();
-                r.onload = ev => resolve(ev.target.result);
-                r.onerror = reject;
-                r.readAsDataURL(file);
-            });
-        }
-
-        async function handleFile(file) {
-            if (!file || !file.type.startsWith('image/')) { alert('Please drop an image'); return; }
-            resetForm();
-            currentFile = file;
-            const b64 = await fileToB64(file);
-            document.getElementById('preview-image').src = b64;
-            document.getElementById('preview-container').style.display = 'block';
-            startProgress();
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                const resp = await fetch(API + 'search', { method: 'POST', body: formData });
-                if (!resp.ok) { const e = await resp.json(); throw new Error(e.detail || resp.statusText); }
-                const data = await resp.json();
-                completeProgress();
-                handleSearchResponse(data);
-            } catch(err) {
-                completeProgress();
-                const r = document.getElementById('search-results');
-                r.style.display = 'block';
-                r.innerHTML = `<div class="error">${escapeHtml(err.message)}</div>`;
-            }
-        }
-
-        function handleSearchResponse(data) {
+async function doFallbackSearch() {
+    const artist = document.getElementById('fb-artist').value.trim();
+    const title = document.getElementById('fb-title').value.trim();
+    if (!artist && !title) return;
+    const fd = new FormData();
+    fd.append('artist', artist);
+    fd.append('title', title);
+    document.getElementById('fb-error').style.display = 'none';
+    try {
+        const res = await fetch(API + 'search-text', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.candidates && data.candidates.length > 0) {
             document.getElementById('fallback-search').style.display = 'none';
-            if (data.message) {
-                document.getElementById('fallback-message').textContent = data.message;
-            }
-            if (data.fallback && (!data.candidates || data.candidates.length === 0)) {
-                document.getElementById('fallback-search').style.display = 'block';
-                if (data.qwen_meta) {
-                    document.getElementById('fb-artist').value = data.qwen_meta.artist;
-                    document.getElementById('fb-title').value = data.qwen_meta.title;
-                }
-                document.getElementById('fb-artist').focus();
-                return;
-            }
-            currentQwenMeta = data.qwen_meta || null;
-            if (currentQwenMeta) {
-                data.candidates = data.candidates || [];
-                data.candidates.unshift({
-                    mbid: 'qwen-ai',
-                    artist: currentQwenMeta.artist,
-                    title: currentQwenMeta.title,
-                    year: currentQwenMeta.year,
-                    from_qwen: true,
-                });
-            }
-            const resDiv = document.getElementById('search-results');
-            showCandidates(data.candidates || []);
+            showCandidates(data.candidates);
+        } else {
+            document.getElementById('fb-error').textContent = 'No matches found on MusicBrainz.';
+            document.getElementById('fb-error').style.display = 'block';
         }
+    } catch (e) {
+        document.getElementById('fb-error').textContent = 'Search failed: ' + e.message;
+        document.getElementById('fb-error').style.display = 'block';
+    }
+}
 
-        function showCandidates(list) {
-            candidates = list;
-            selectedMbid = null;
-            document.getElementById('catalog-btn').disabled = true;
-            
-            // Hide all metadata sections
-            const md = document.getElementById('metadata-display');
-            if (md) { md.style.display = 'none'; }
-            
-            const resDiv = document.getElementById('search-results');
-            if (list.length === 0) {
-                resDiv.innerHTML = '<div class="error">No matching releases found.</div>';
-                resDiv.style.display = 'block';
-                return;
-            }
-            const fromIndex = list.some(c => c.from_index);
-            const header = fromIndex ? 'Found in your collection:' : 'Select the matching release:';
-            resDiv.innerHTML = `<h3 style="margin-bottom:15px;">${header}</h3>`;
-            list.forEach(c => {
-                const row = document.createElement('div');
-                row.className = 'candidate-row';
-                if (c.from_qwen) row.classList.add('qwen-row');
-                row.dataset.mbid = c.mbid;
-                row.onclick = () => selectCandidate(row, c.mbid);
-                const img = document.createElement('img');
-                img.className = 'candidate-thumb';
-                img.alt = 'cover';
-                if (c.from_qwen) { img.style.display = 'none'; }
-                else {
-                    img.onerror = () => { img.style.display = 'none'; };
-                    img.src = c.cover_url;
-                }
-                row.innerHTML = '';
-                row.appendChild(img);
-                const badge = c.from_index ? `<span class="index-badge">From your collection</span>` :
-                    c.from_qwen ? `<span class="index-badge ai-badge">AI Recognition</span>` : '';
-                const pct = c.similarity ? `<span class="match-pct">${fmtPct(c.similarity)}</span>` : '';
-                row.innerHTML += `
-                    <div class="candidate-info">
-                        <div class="candidate-artist">${escapeHtml(c.artist)}${badge}</div>
-                        <div class="candidate-title">${escapeHtml(c.title)}</div>
-                        <div class="candidate-year">${escapeHtml(c.year || '&#8212;')}${pct}</div>
-                    </div>
-                    <span class="selected-label" style="display:none;">✓ Selected</span>
-                `;
-                resDiv.appendChild(row);
-            });
-            resDiv.style.display = 'block';
-        }
+document.getElementById('fb-search-btn').addEventListener('click', doFallbackSearch);
+document.getElementById('fb-artist').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
+document.getElementById('fb-title').addEventListener('keydown', e => { if (e.key === 'Enter') doFallbackSearch(); });
 
-        function selectCandidate(el, mbid) {
-            document.querySelectorAll('.candidate-row').forEach(r => {
-                r.classList.remove('selected');
-                r.querySelector('.selected-label').style.display = 'none';
-            });
-            el.classList.add('selected');
-            el.querySelector('.selected-label').style.display = 'inline';
-            selectedMbid = mbid;
-            document.getElementById('catalog-btn').disabled = false;
-            const sel = candidates.find(c => c.mbid === mbid);
-            if (sel) {
-                const displayGrid = document.getElementById('metadata-display-grid');
-                displayGrid.innerHTML = '';
-                if (sel.from_qwen && currentQwenMeta) {
-                    const m = currentQwenMeta;
-                    const rows = [
-                        ['Artist', m.artist],
-                        ['Title',  m.title],
-                        ['Year',   m.year || '&#8212;'],
-                        ['Label',  m.label || '&#8212;'],
-                        ['Genre',  (m.genre || []).join(', ') || '&#8212;'],
-                        ['Discogs ID', m.discogs_id || '&#8212;'],
-                        ['Price Est.', m.price_estimate || '&#8212;'],
-                    ];
-                    rows.forEach(([lbl, val]) => {
-                        displayGrid.innerHTML += `<div class="metadata-item"><span class="label">${lbl}</span><div class="value">${escapeHtml(String(val))}</div></div>`;
-                    });
-                    displayGrid.innerHTML += `<div class="metadata-item"><span class="label">Info</span><div class="value" style="font-size:0.85em;line-height:1.4">${escapeHtml(m.info || '&#8212;')}</div></div>`;
-                    document.getElementById('catalog-btn').textContent = 'Catalog from AI Suggestion';
-                } else {
-                    const rows = [
-                        ['Artist', sel.artist],
-                        ['Title',  sel.title],
-                        ['Year',   sel.year || 'Unknown'],
-                        ['Match',  sel.similarity ? fmtPct(sel.similarity) : '&#8212;'],
-                        ['MBID',   sel.mbid],
-                    ];
-                    rows.forEach(([lbl, val]) => {
-                        displayGrid.innerHTML += `<div class="metadata-item"><span class="label">${lbl}</span><div class="value">${escapeHtml(String(val))}</div></div>`;
-                    });
-                document.getElementById('catalog-btn').textContent = 'Catalog This Release';
-            }
-            // Show metadata display section
-            const metadataDisplay = document.getElementById('metadata-display');
-            if (metadataDisplay) {
-                metadataDisplay.style.display = 'block';
-                metadataDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-        }
+document.getElementById('catalog-btn').addEventListener('click', doCatalog);
 
-        async function doFallbackSearch() {
-            const artist = document.getElementById('fb-artist').value.trim();
-            const title  = document.getElementById('fb-title').value.trim();
-            if (!artist && !title) return;
-            document.getElementById('fb-error').style.display = 'none';
-            document.getElementById('fb-search-btn').disabled = true;
-            try {
-                const formData = new FormData();
-                formData.append('artist', artist);
-                formData.append('title', title);
-                const resp = await fetch(API + 'search-text', { method: 'POST', body: formData });
-                if (!resp.ok) { const e = await resp.json(); throw new Error(e.detail || resp.statusText); }
-                const data = await resp.json();
-                document.getElementById('fallback-search').style.display = 'none';
-                showCandidates(data.candidates || []);
-            } catch(err) {
-                document.getElementById('fb-error').textContent = err.message;
-                document.getElementById('fb-error').style.display = 'block';
-            } finally {
-                document.getElementById('fb-search-btn').disabled = false;
-            }
-        }
-
-        async function doCatalog() {
-            if (!currentFile) return;
-            const formData = new FormData();
-            formData.append('image', currentFile);
-            formData.append('condition', document.getElementById('condition').value);
-            formData.append('notes', document.getElementById('notes').value);
-
-            if (selectedMbid === 'qwen-ai' && currentQwenMeta) {
-                const m = currentQwenMeta;
-                formData.append('artist', m.artist);
-                formData.append('title', m.title);
-                formData.append('mbid', '');
-                formData.append('cover_url', '');
-                formData.append('year', String(m.year || ''));
-                formData.append('label', m.label || '');
-                formData.append('genre', (m.genre || []).join(', '));
-                formData.append('info', m.info || '');
-                formData.append('discogs_id', String(m.discogs_id || ''));
-                formData.append('price_estimate', m.price_estimate || '');
-            } else {
-                if (!selectedMbid) return;
-                const sel = candidates.find(c => c.mbid === selectedMbid);
-                if (!sel) return;
-                formData.append('artist', sel.artist);
-                formData.append('title', sel.title);
-                formData.append('mbid', sel.mbid);
-                formData.append('cover_url', sel.cover_url || '');
-            }
-
-            try {
-                const r = await fetch(API + 'upload', { method: 'POST', body: formData });
-                if (!r.ok) { const e = await r.json(); throw new Error(e.detail || r.statusText); }
-                const result = await r.json();
-                alert('Album cataloged!');
-                document.getElementById('batch-modal-content').querySelector('#catalog-stats-content').style.display = 'block';
-                document.getElementById('batch-modal-content').querySelectorAll('#batch-modal-content > :not(#catalog-stats-content)').forEach(el => {
-                    if (!el.classList.contains('hidden')) el.style.display = 'none';
-                });
-                const cnt = parseInt(document.getElementById('album-count').textContent || '0') + 1;
-                document.getElementById('album-count').textContent = cnt;
-            } catch(err) {
-                alert(err.message);
-            }
-        }
-
-        function resetForm() {
+async function doCatalog() {
+    const target = window._catalogTarget;
+    if (!target || !target.candidate) return;
+    const candidate = target.candidate;
+    const file = target.file;
+    if (!file) { alert('No image file available. Please re-select the image.'); return; }
+    const btn = document.getElementById('catalog-btn');
+    btn.disabled = true;
+    btn.textContent = 'Cataloging...';
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('artist', candidate.artist || '');
+    fd.append('title', candidate.title || '');
+    fd.append('mbid', candidate.mbid || '');
+    fd.append('cover_url', candidate.cover_url || '');
+    fd.append('condition', document.getElementById('condition').value);
+    fd.append('notes', document.getElementById('notes').value);
+    fd.append('year', candidate.year || '');
+    if (candidate.label) fd.append('label', candidate.label);
+    if (candidate.genre) fd.append('genre', Array.isArray(candidate.genre) ? candidate.genre.join(', ') : candidate.genre);
+    if (candidate.info) fd.append('info', candidate.info);
+    if (candidate.discogs_id) fd.append('discogs_id', String(candidate.discogs_id));
+    if (candidate.price_estimate) fd.append('price_estimate', candidate.price_estimate);
+    try {
+        const res = await fetch(API + 'upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.status === 'cataloged') {
+            document.getElementById('catalog-form-section').style.display = 'none';
+            document.getElementById('catalog-stats-section').style.display = 'block';
+            document.getElementById('album-count').textContent = '1';
             currentFile = null;
-            candidates  = [];
-            selectedMbid = null;
-            currentQwenMeta = null;
-            
-            // Hide all sections (safe with null checks)
-            const elementsToHide = ['metadata-display', 'search-results', 'fallback-search', 
-                'preview-container', 'progress-container'];
-            elementsToHide.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.style.display = 'none'; }
-            });
-            
-            // Show drop zone
-            const dropZone = document.getElementById('drop-zone');
-            if (dropZone) dropZone.style.display = 'block';
-            
-            // Reset UI state
-            if (document.getElementById('search-results')) {
-                document.getElementById('search-results').innerHTML = '';
-            }
-            
-            if (document.getElementById('catalog-btn')) {
-                document.getElementById('catalog-btn').disabled = true;
-            }
-            
-            if (document.getElementById('notes')) {
-                document.getElementById('notes').value = '';
-            }
-            
-            if (document.getElementById('condition')) {
-                document.getElementById('condition').value = 'NM';
-            }
-            
-            if (progressTimer) clearInterval(progressTimer);
+            window._catalogTarget = null;
+        } else {
+            alert('Catalog failed: ' + (data.detail || 'unknown error'));
         }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Catalog This Release';
+}
 
-        // ── Catalog View ──
-        async function loadCatalog() {
-            try {
-                const r = await fetch(API + 'catalog');
-                if (!r.ok) throw new Error('Failed to load catalog');
-                const data = await r.json();
-                catalogData = data.albums || [];
-                updateStats();
-                renderCatalog();
-            } catch(err) {
-                document.getElementById('catalog-albums').innerHTML =
-                    `<div class="error">${escapeHtml(err.message)}</div>`;
-            }
+function resetForm() {
+    document.getElementById('catalog-form-section').style.display = 'block';
+    document.getElementById('catalog-stats-section').style.display = 'none';
+    currentFile = null;
+    selectedMbid = '';
+    candidates = [];
+    window._catalogTarget = null;
+    document.getElementById('preview-container').style.display = 'none';
+    document.getElementById('preview-image').src = '';
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('fallback-search').style.display = 'none';
+    document.getElementById('metadata-display').style.display = 'none';
+    document.getElementById('catalog-btn').disabled = true;
+    document.getElementById('notes').value = '';
+    document.getElementById('condition').value = 'NM';
+    document.getElementById('drop-zone').style.display = 'block';
+}
+
+document.getElementById('batch-process-btn').addEventListener('click', processBatch);
+
+async function processBatch() {
+    const files = document.getElementById('batch-files').files;
+    if (files.length < 1) {
+        document.getElementById('batch-error').textContent = 'Please select at least one file.';
+        document.getElementById('batch-error').style.display = 'block';
+        return;
+    }
+    document.getElementById('batch-error').style.display = 'none';
+    const progress = document.getElementById('batch-progress');
+    const status = document.getElementById('batch-status');
+    const resultsDiv = document.getElementById('batch-results');
+    resultsDiv.style.display = 'none';
+    resultsDiv.innerHTML = '';
+    progress.style.display = 'block';
+    const hint = document.getElementById('batch-hint').value.trim();
+    let results = [];
+    let fileRefs = [];
+    for (let i = 0; i < files.length; i++) {
+        fileRefs.push(files[i]);
+        status.textContent = 'Processing file ' + (i + 1) + ' of ' + files.length + ': ' + files[i].name;
+        const fd = new FormData();
+        fd.append('image', files[i]);
+        if (hint) fd.append('hint', hint);
+        try {
+            const res = await fetch(API + 'search', { method: 'POST', body: fd });
+            const data = await res.json();
+            results.push({ filename: files[i].name, status: 'success', result: data });
+        } catch (e) {
+            results.push({ filename: files[i].name, status: 'error', result: null, error: e.message });
         }
-
-        function updateStats() {
-            document.getElementById('cat-count').textContent = catalogData.length;
-            const allGenres = new Set();
-            let totalValue = 0;
-            catalogData.forEach(a => {
-                (a.genre || []).forEach(g => allGenres.add(g));
-                if (a.price_range && a.price_range.avg) totalValue += Number(a.price_range.avg);
-            });
-            document.getElementById('cat-genres').textContent = allGenres.size || '&#8212;';
-            document.getElementById('cat-value').textContent =
-                totalValue > 0 ? '$' + totalValue.toFixed(0) : '&#8212;';
-        }
-
-        function renderCatalog() {
-            const container = document.getElementById('catalog-albums');
-            const filter = document.getElementById('cat-search').value.toLowerCase().trim();
-
-            let filtered = catalogData;
-            if (filter) {
-                filtered = catalogData.filter(a =>
-                    (a.artist || '').toLowerCase().includes(filter) ||
-                    (a.title || '').toLowerCase().includes(filter) ||
-                    (a.label || '').toLowerCase().includes(filter) ||
-                    (a.genre || []).some(g => g.toLowerCase().includes(filter)) ||
-                    (a.year || '').includes(filter)
-                );
-            }
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="cat-empty">
-                        ${catalogData.length === 0
-                            ? '<strong>No albums cataloged yet</strong><p>Drop a cover on the Search tab to get started.</p>'
-                            : '<strong>No matches</strong><p>Try a different filter.</p>'}
-                    </div>`;
-                return;
-            }
-
-            if (currentView === 'grid') {
-                let html = '<div class="catalog-grid">';
-                filtered.forEach(a => {
-                    const price = fmtPrice(a.price_range);
-                    html += `
-                        <div class="grid-card" onclick="showDetail('${escapeHtml(a.mbid)}')">
-                            <img src="${escapeHtml(a.cover_url || '')}" alt="${escapeHtml(a.title)}" onerror="this.style.display='none'" />
-                            <div class="body">
-                                <div class="artist">${escapeHtml(a.artist)}</div>
-                                <div class="title">${escapeHtml(a.title)}</div>
-                                ${price ? `<div class="price">${escapeHtml(price)}</div>` : ''}
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            } else {
-                let html = '<div class="catalog-list">';
-                filtered.forEach(a => {
-                    const price = fmtPrice(a.price_range);
-                    const priceRange = fmtPriceRange(a.price_range);
-                    const tags = a.tags || a.genre || [];
-                    const info = a.info || '';
-                    html += `
-                        <div class="list-item" onclick="showDetail('${escapeHtml(a.mbid)}')">
-                            <img src="${escapeHtml(a.cover_url || '')}" alt="${escapeHtml(a.title)}" onerror="this.style.display='none'" />
-                            <div class="body">
-                                <div>
-                                    <div class="artist">${escapeHtml(a.artist)}</div>
-                                    <div class="title">${escapeHtml(a.title)}</div>
-                                    <div class="meta">
-                                        ${escapeHtml(a.year || '')}
-                                        ${a.label ? '&#183; ' + escapeHtml(a.label) : ''}
-                                        ${a.format ? '&#183; ' + escapeHtml(a.format) : ''}
-                                        ${a.country ? '&#183; ' + escapeHtml(a.country) : ''}
-                                    </div>
-                                    ${tags.length ? '<div class="tags">' +
-                                        tags.slice(0, 8).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('') +
-                                    '</div>' : ''}
-                                    ${info ? `<div class="info-text">${escapeHtml(info)}</div>` : ''}
-                                </div>
-                            </div>
-                            <div class="price-col">
-                                ${price ? `<div class="amt">${escapeHtml(price)}</div>` : ''}
-                                <div class="lbl">${priceRange ? escapeHtml(priceRange) : (a.condition || '')}</div>
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            }
-        }
-
-        function showDetail(mbid) {
-            const album = catalogData.find(a => a.mbid === mbid);
-            if (!album) return;
-            const price = fmtPrice(album.price_range);
-            const priceRange = fmtPriceRange(album.price_range);
-            const tags = album.tags || album.genre || [];
-            const coverSrc = album.cover_url || (album.image ? API + 'images/' + album.image : '');
-            const discogsLink = album.discogs_url
-                ? `<a href="${escapeHtml(album.discogs_url)}" target="_blank" rel="noopener">View on Discogs &rarr;</a>`
-                : '';
-
-            let html = `
-                <img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(album.title)}" onerror="this.style.display='none'" />
-                <h2>${escapeHtml(album.title)}</h2>
-                <div class="sub">${escapeHtml(album.artist)}${album.year ? ' &middot; ' + escapeHtml(album.year) : ''}</div>
-                <div class="dgrid">
-                    ${album.label ? `<div class="ditem"><div class="lbl">Label</div><div class="val">${escapeHtml(album.label)}</div></div>` : ''}
-                    ${album.format ? `<div class="ditem"><div class="lbl">Format</div><div class="val">${escapeHtml(album.format)}</div></div>` : ''}
-                    ${album.condition ? `<div class="ditem"><div class="lbl">Condition</div><div class="val">${escapeHtml(album.condition)}</div></div>` : ''}
-                    ${album.country ? `<div class="ditem"><div class="lbl">Country</div><div class="val">${escapeHtml(album.country)}</div></div>` : ''}
-                    ${album.catalog_number ? `<div class="ditem"><div class="lbl">Cat. No.</div><div class="val">${escapeHtml(album.catalog_number)}</div></div>` : ''}
-                </div>
-                ${(album.genre || []).length ? '<div class="tags">' +
-                    (album.genre || []).map(g => `<span class="tag">${escapeHtml(String(g))}</span>`).join('') +
-                '</div>' : ''}
-                ${tags.length ? '<div class="tags" style="margin-top:4px;">' +
-                    tags.slice(0, 10).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('') +
-                '</div>' : ''}
-                ${album.info ? `<div class="info-block"><div class="lbl">About this album</div>${escapeHtml(album.info)}</div>` : ''}
-                ${price ? `<div class="price-block"><div class="amt">${escapeHtml(price)}</div><div class="lbl">Estimated Value</div>${priceRange ? `<div class="range">${escapeHtml(priceRange)}</div>` : ''}</div>` : ''}
-                <div style="text-align:center;margin-top:14px;font-size:0.85em;">
-                    ${discogsLink}
-                    ${album.mbid ? `<span style="color:#64748b;margin:0 8px;">&middot;</span>MBID: ${escapeHtml(album.mbid.slice(0,8))}...` : ''}
-                </div>
-            `;
-
-            document.getElementById('detail-content').innerHTML = html;
-            document.getElementById('detail-modal').classList.add('open');
-        }
-
-        function closeDetail() {
-            document.getElementById('detail-modal').classList.remove('open');
-        }
-
-        document.getElementById('detail-modal').addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeDetail();
+    }
+    progress.style.display = 'none';
+    window._batchResults = results;
+    window._batchFileRefs = fileRefs;
+    if (results.length === 0) {
+        document.getElementById('batch-error').textContent = 'No files were processed.';
+        document.getElementById('batch-error').style.display = 'block';
+        return;
+    }
+    resultsDiv.style.display = 'block';
+    let html = '';
+    const succeeded = results.filter(r => r.status === 'success' && r.result && r.result.candidates && r.result.candidates.length > 0);
+    if (succeeded.length === 0) {
+        html = '<p style="color:#ef4444;">No matches found for any file.</p>';
+    } else {
+        html = '<div class="results-header"><h3>Batch Results</h3><span style="color:#94a3b8;font-size:0.9em;">' + succeeded.length + ' of ' + results.length + ' matched</span></div>';
+        succeeded.forEach((r, i) => {
+            const cand = r.result.candidates[0];
+            html += '<div class="result-item">' +
+                '<img class="result-thumb" src="' + (cand.cover_url || '') + '" alt="">' +
+                '<div class="result-info">' +
+                    '<div class="result-title">' + escapeHtml(cand.title) + '</div>' +
+                    '<div class="result-artist">' + escapeHtml(cand.artist) + '</div>' +
+                    '<div class="result-status">✔ Matched</div>' +
+                '</div>' +
+                '<button class="catalog-sm-btn" onclick="catalogBatchResult(' + i + ')">Catalog</button>' +
+            '</div>';
         });
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeDetail();
-        });
+    }
+    resultsDiv.innerHTML = html;
+}
 
-        // ── Batch Upload Modal ──
-        let batchFiles = [];
-        let batchResults = [];
-        let batchMode = ''; // 'multi-file' or 'single-photo'
-        let lastMultiPhotoFile = null;
+function catalogBatchResult(idx) {
+    const results = window._batchResults;
+    const files = window._batchFileRefs;
+    if (!results || !files || !results[idx]) return;
+    const r = results[idx];
+    if (r.status !== 'success' || !r.result || !r.result.candidates || !r.result.candidates[0]) return;
+    const cand = r.result.candidates[0];
+    window._catalogTarget = { candidate: cand, file: files[idx] };
+    openCatalogFormModal(window._catalogTarget);
+}
 
-        function showBatchModeSelect() {
-            document.getElementById('batch-mode-select').style.display = 'block';
-            document.getElementById('batch-multi-file').style.display = 'none';
-            document.getElementById('batch-single-photo').style.display = 'none';
-        }
+document.getElementById('group-process-btn').addEventListener('click', processGroupPhoto);
 
-        function showMultiFileMode() {
-            batchMode = 'multi-file';
-            document.getElementById('batch-mode-select').style.display = 'none';
-            document.getElementById('batch-multi-file').style.display = 'block';
-            document.getElementById('batch-single-photo').style.display = 'none';
-        }
-
-        function showSinglePhotoMode() {
-            batchMode = 'single-photo';
-            document.getElementById('batch-mode-select').style.display = 'none';
-            document.getElementById('batch-multi-file').style.display = 'none';
-            document.getElementById('batch-single-photo').style.display = 'block';
-        }
-
-        function toggleBatchModal() {
-            const modal = document.getElementById('detail-modal');
-            document.getElementById('batch-files').value = '';
-            document.getElementById('multi-photo-file').value = '';
-            batchResults = [];
-            lastMultiPhotoFile = null;
-            modal.style.display = 'none';
-            setTimeout(() => {
-                modal.style.display = 'flex';
-                showBatchModeSelect();
-            }, 10);
-        }
-
-        async function processBatch() {
-            batchFiles = Array.from(document.getElementById('batch-files').files);
-            if (batchFiles.length < 1) {
-                alert('Please select at least one file');
-                return;
-            }
-
-            const content = document.getElementById('detail-modal');
-            content.innerHTML = '';
-
-            const progressDiv = document.createElement('div');
-            progressDiv.id = 'batch-progress';
-            progressDiv.style.cssText = 'display:block;margin:20px 0;text-align:center;';
-            progressDiv.innerHTML = `
-                <p style="margin-bottom:15px;"><strong>📂 Processing ${batchFiles.length} file(s)...</strong></p>
-                <div id="progress-track" style="background:#334155;border-radius:8px;height:8px;overflow:hidden;margin-bottom:8px;">
-                    <div id="progress-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#4a90d9,#66a3ff);transition:width 0.4s ease;border-radius:8px;"></div>
-                </div>
-                <div class="progress-steps">
-                    <span class="step active" id="batch-step-1">Selecting files</span>
-                    <span class="step done" id="batch-step-2">Processing...</span>
-                    <span class="step" id="batch-step-3">Review results</span>
-                </div>
-                <p style="margin-top:10px;color:#64748b;">This may take a moment. You'll be able to catalog matches after processing.</p>
-            `;
-            content.appendChild(progressDiv);
-
-            let successCount = 0;
-
-            for (let i = 0; i < batchFiles.length; i++) {
-                const formData = new FormData();
-                formData.append('image', batchFiles[i]);
-
-                try {
-                    const res = await fetch('/search', { method: 'POST', body: formData });
-                    const data = await res.json();
-
-                    if (data.candidates && data.candidates.length > 0) {
-                        successCount++;
-                    }
-
-                    batchResults.push({
-                        filename: batchFiles[i].name,
-                        result: data,
-                        status: 'processed',
-                        imageFile: batchFiles[i],
-                    });
-                } catch (err) {
-                    batchResults.push({
-                        filename: batchFiles[i].name,
-                        error: err.message,
-                        status: 'failed'
-                    });
-                }
-
-                const fill = progressDiv.querySelector('#progress-fill');
-                if (fill) fill.style.width = ((i + 1) / batchFiles.length * 100) + '%';
-                await new Promise(r => setTimeout(r, 50));
-            }
-
-            showBatchResults();
-        }
-
-        async function processMultiPhoto() {
-            const fileInput = document.getElementById('multi-photo-file');
-            const file = fileInput.files[0];
-            if (!file) { alert('Please select a photo'); return; }
-
-            lastMultiPhotoFile = file;
-
-            const content = document.getElementById('detail-modal');
-            content.innerHTML = '';
-
-            const progressDiv = document.createElement('div');
-            progressDiv.style.cssText = 'text-align:center;margin:40px 20px;';
-            progressDiv.innerHTML = `
-                <p style="margin-bottom:20px;"><strong>🔍 Analyzing photo for albums...</strong></p>
-                <p style="color:#64748b;font-size:0.9em;">Qwen AI is scanning the image. This may take 20-60 seconds.</p>
-            `;
-            content.appendChild(progressDiv);
-
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                const res = await fetch('/batch/multi-photo', { method: 'POST', body: formData });
-                if (!res.ok) { const e = await res.json(); throw new Error(e.detail || res.statusText); }
-                const data = await res.json();
-
-                batchResults = [];
-                (data.results || []).forEach(r => {
-                    batchResults.push({
-                        status: 'processed',
-                        filename: r.artist + ' - ' + r.title,
-                        result: { qwen_meta: { artist: r.artist, title: r.title }, candidates: r.cover_url ? [{ artist: r.artist, title: r.title, cover_url: r.cover_url, mbid: r.mbid, similarity: 1 }] : [] },
-                        imageFile: file,
-                        index: r.index,
-                    });
-                });
-
-                showBatchResults();
-
-            } catch (err) {
-                content.innerHTML = `
-                    <div style="text-align:center;margin:40px 20px;">
-                        <p class="error">${escapeHtml(err.message)}</p>
-                        <button onclick="showBatchModeSelect()" style="margin-top:20px;background:#334155;">← Try Again</button>
-                    </div>
-                `;
-            }
-        }
-
-        function showBatchResults() {
-            const content = document.getElementById('detail-modal');
-            const successCount = batchResults.filter(r => r.status === 'processed' && r.result.candidates && r.result.candidates.length > 0).length;
-            content.innerHTML = `
-                <div style="background:#1a1a2e;padding:30px 20px;border-radius:12px;text-align:center;">
-                    <h2>📊 ${batchMode === 'single-photo' ? 'Albums Found' : 'Batch Processing Complete'}</h2>
-                    <p><strong>Identified:</strong> ${successCount} album(s)</p>
-                    <p style="color:#ef4444;margin:10px 0;"><strong>Failed:</strong> ${batchResults.length - successCount}</p>
-                    <div style="margin-top:20px;">
-                        <button onclick="showBatchGrid()" style="background:#4a90d9;padding:12px 30px;font-size:16px;cursor:pointer;">🔍 ${batchMode === 'single-photo' ? 'View Albums' : 'View All Results'}</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function catalogFromBatch(item) {
-            if (!item.imageFile) { alert('No image available for cataloging'); return; }
-
-            const result = item.result;
-            const meta = result.qwen_meta || {};
-            const best = (result.candidates || [])[0] || {};
-
-            const formData = new FormData();
-            formData.append('image', item.imageFile);
-            formData.append('artist', meta.artist || best.artist || '');
-            formData.append('title', meta.title || best.title || '');
-            formData.append('mbid', best.mbid || '');
-            formData.append('cover_url', best.cover_url || '');
-            formData.append('condition', 'NM');
-            formData.append('notes', '');
-            formData.append('year', meta.year || '');
-            formData.append('label', meta.label || '');
-            formData.append('genre', Array.isArray(meta.genre) ? meta.genre.join(', ') : (meta.genre || ''));
-            formData.append('info', meta.info || '');
-            formData.append('discogs_id', String(meta.discogs_id || ''));
-            formData.append('price_estimate', meta.price_estimate || '');
-
-            try {
-                const r = await fetch(API + 'upload', { method: 'POST', body: formData });
-                if (!r.ok) { const e = await r.json(); throw new Error(e.detail || r.statusText); }
-                alert(`✅ Cataloged: ${meta.artist || best.artist} - ${meta.title || best.title}`);
-                loadCatalog();
-            } catch (err) {
-                alert(err.message);
-            }
-        }
-
-        function showBatchGrid() {
-            const content = document.getElementById('detail-modal');
-            const summaryDiv = content.querySelector('[style*="background:#1a1a2e"]');
-            if (summaryDiv) summaryDiv.style.display = 'none';
-
-            content.innerHTML = `<h3 style="margin-bottom:15px;">${batchMode === 'single-photo' ? '🖼️ Albums Found in Photo' : '📂 Batch Processing Results'}</h3>
-                <button onclick="toggleBatchModal()" style="background:#334155;margin-bottom:15px;padding:8px 16px;font-size:0.9em;">← New Batch</button>`;
-
-            batchResults.forEach((item, idx) => {
-                const row = document.createElement('div');
-                row.className = 'candidate-row';
-
-                if (item.status === 'failed') {
-                    row.style.borderColor = '#ef4444';
-                    row.style.background = 'rgba(239,68,68,0.15)';
-                    row.innerHTML = `<div class="error">Failed: ${escapeHtml(item.filename)} - ${item.error}</div>`;
-                } else {
-                    const meta = item.result.qwen_meta || {};
-                    const best = (item.result.candidates || [])[0] || {};
-                    const artist = meta.artist || best.artist || 'Unknown';
-                    const title = meta.title || best.title || 'Unknown';
-                    const coverUrl = best.cover_url || '';
-
-                    row.innerHTML = `
-                        <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
-                            ${coverUrl ? `<img src="${escapeHtml(coverUrl)}" class="candidate-thumb"/>` : ''}
-                            <div class="candidate-info">
-                                <div class="candidate-artist">${escapeHtml(artist)}</div>
-                                <div class="candidate-title">${escapeHtml(title)}</div>
-                                ${item.filename && batchMode !== 'single-photo' ? `<div style="color:#64748b;font-size:0.75em;margin-top:2px;">${escapeHtml(item.filename)}</div>` : ''}
-                            </div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-                            <button onclick="catalogFromBatch(batchResults[${idx}])" style="background:#4ade80;color:#000;padding:8px 12px;font-size:0.9em;text-align:center;">✅ Catalog</button>
-                        </div>
-                    `;
-                }
-                content.appendChild(row);
+async function processGroupPhoto() {
+    const file = document.getElementById('group-file').files[0];
+    if (!file) {
+        document.getElementById('group-error').textContent = 'Please select a photo.';
+        document.getElementById('group-error').style.display = 'block';
+        return;
+    }
+    document.getElementById('group-error').style.display = 'none';
+    const progress = document.getElementById('group-progress');
+    const status = document.getElementById('group-status');
+    const resultsDiv = document.getElementById('group-results');
+    resultsDiv.style.display = 'none';
+    resultsDiv.innerHTML = '';
+    progress.style.display = 'block';
+    status.textContent = 'Analyzing photo for multiple albums...';
+    const hint = document.getElementById('group-hint').value.trim();
+    const fd = new FormData();
+    fd.append('image', file);
+    if (hint) fd.append('hint', hint);
+    try {
+        const res = await fetch(API + 'batch/multi-photo', { method: 'POST', body: fd });
+        const data = await res.json();
+        progress.style.display = 'none';
+        if (data.total > 0 && data.results) {
+            resultsDiv.style.display = 'block';
+            let html = '<div class="results-header"><h3>Found ' + data.total + ' Album' + (data.total !== 1 ? 's' : '') + '</h3></div>';
+            window._groupResults = data.results;
+            window._groupFile = file;
+            data.results.forEach((r, i) => {
+                html += '<div class="result-item">' +
+                    '<img class="result-thumb" src="' + (r.cover_url || '') + '" alt="">' +
+                    '<div class="result-info">' +
+                        '<div class="result-title">' + escapeHtml(r.title) + '</div>' +
+                        '<div class="result-artist">' + escapeHtml(r.artist) + '</div>' +
+                        (r.mbid ? '<div class="result-mbid">MBID: ' + r.mbid.slice(0, 8) + '</div>' : '') +
+                    '</div>' +
+                    '<button class="catalog-sm-btn" onclick="catalogGroupResult(' + i + ')">Catalog</button>' +
+                '</div>';
             });
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<p style="color:#f59e0b;padding:20px;">No albums could be identified in this photo. Try a clearer image or adjust the hint.</p>';
         }
+    } catch (e) {
+        progress.style.display = 'none';
+        document.getElementById('group-error').textContent = 'Error: ' + e.message;
+        document.getElementById('group-error').style.display = 'block';
+    }
+}
 
-        // Helper function for escaping HTML
-        function escapeHtml(text) {
-            if (!text) return '';
-            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function catalogGroupResult(idx) {
+    const items = window._groupResults;
+    const file = window._groupFile;
+    if (!items || !items[idx]) return;
+    const r = items[idx];
+    window._catalogTarget = {
+        candidate: { artist: r.artist, title: r.title, mbid: r.mbid, cover_url: r.cover_url, year: '', label: '', genre: '', info: '', discogs_id: '', price_estimate: '' },
+        file: file
+    };
+    openCatalogFormModal(window._catalogTarget);
+}
+
+function closeDetail() {
+    document.getElementById('detail-modal').classList.remove('open');
+    document.getElementById('catalog-form-section').style.display = 'block';
+    document.getElementById('catalog-stats-section').style.display = 'none';
+}
+
+function openCatalogFormModal(target) {
+    if (!target || !target.candidate) return;
+    const candidate = target.candidate;
+    const grid = document.getElementById('metadata-grid');
+    grid.innerHTML = '<span class="label">Artist</span><span>' + escapeHtml(candidate.artist) + '</span>' +
+        '<span class="label">Title</span><span>' + escapeHtml(candidate.title) + '</span>' +
+        '<span class="label">Year</span><span>' + (candidate.year || '—') + '</span>' +
+        (candidate.mbid ? '<span class="label">MBID</span><span style="font-size:0.8em;">' + candidate.mbid + '</span>' : '');
+    document.getElementById('detail-content').innerHTML = '';
+    document.getElementById('catalog-form-fields').style.display = 'block';
+    document.getElementById('catalog-btn').disabled = false;
+    document.getElementById('catalog-form-section').style.display = 'block';
+    document.getElementById('catalog-stats-section').style.display = 'none';
+    document.getElementById('detail-modal').classList.add('open');
+}
+
+document.getElementById('detail-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeDetail();
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDetail();
+});
+
+async function loadCatalog() {
+    try {
+        const res = await fetch(API + 'catalog');
+        const data = await res.json();
+        catalogData = data.albums || [];
+        updateStats();
+        renderCatalog();
+    } catch (e) { console.error('Catalog load error:', e); }
+}
+
+function updateStats() {
+    document.getElementById('cat-count').textContent = catalogData.length;
+    const genres = new Set();
+    let totalValue = 0;
+    let hasValue = false;
+    catalogData.forEach(a => {
+        if (a.genre) {
+            (Array.isArray(a.genre) ? a.genre : String(a.genre).split(',')).forEach(g => genres.add(g.trim()));
         }
+        if (a.price_estimate) {
+            const m = String(a.price_estimate).match(/[\d.]+/g);
+            if (m) {
+                const nums = m.map(Number).filter(n => n > 0 && n < 10000);
+                if (nums.length) { totalValue += nums[0]; hasValue = true; }
+            }
+        }
+    });
+    document.getElementById('cat-genres').textContent = genres.size ? genres.size : '—';
+    document.getElementById('cat-value').textContent = hasValue ? '$' + totalValue.toFixed(0) : '—';
+}
 
-    </script>
+function renderCatalog() {
+    const q = document.getElementById('cat-search').value.toLowerCase();
+    const filtered = q ? catalogData.filter(a =>
+        (a.artist || '').toLowerCase().includes(q) ||
+        (a.title || '').toLowerCase().includes(q)
+    ) : catalogData;
+    const container = document.getElementById('catalog-albums');
+    if (filtered.length === 0) {
+        container.innerHTML = '<p style="color:#64748b;text-align:center;padding:40px;">No albums yet. Search and catalog your first album!</p>';
+        return;
+    }
+    if (currentView === 'grid') {
+        container.innerHTML = '<div class="catalog-grid">' +
+            filtered.map(a => '<div class="grid-card" onclick="showDetail(\'' + a.mbid + '\')">' +
+                '<img src="' + (a.cover_url || '/images/' + a.image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<div class="grid-info">' +
+                    '<div class="grid-artist">' + escapeHtml(a.artist) + '</div>' +
+                    '<div class="grid-title">' + escapeHtml(a.title) + '</div>' +
+                    (a.condition ? '<span class="grid-condition">' + a.condition + '</span>' : '') +
+                '</div>' +
+            '</div>').join('') +
+        '</div>';
+    } else {
+        container.innerHTML = '<div class="catalog-list">' +
+            filtered.map(a => '<div class="list-item" onclick="showDetail(\'' + a.mbid + '\')">' +
+                '<img src="' + (a.cover_url || '/images/' + a.image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<div class="list-info">' +
+                    '<div class="list-artist">' + escapeHtml(a.artist) + '</div>' +
+                    '<div class="list-title">' + escapeHtml(a.title) + '</div>' +
+                    '<div class="list-meta">' + (a.year || '') + (a.condition ? ' · ' + a.condition : '') + '</div>' +
+                '</div>' +
+            '</div>').join('') +
+        '</div>';
+    }
+}
+
+document.getElementById('cat-search').addEventListener('input', renderCatalog);
+document.getElementById('view-grid').addEventListener('click', () => {
+    currentView = 'grid';
+    document.getElementById('view-grid').classList.add('active');
+    document.getElementById('view-list').classList.remove('active');
+    renderCatalog();
+});
+document.getElementById('view-list').addEventListener('click', () => {
+    currentView = 'list';
+    document.getElementById('view-list').classList.add('active');
+    document.getElementById('view-grid').classList.remove('active');
+    renderCatalog();
+});
+
+function showDetail(mbid) {
+    const album = catalogData.find(a => a.mbid === mbid);
+    if (!album) return;
+    const coverUrl = album.cover_url || ('/images/' + album.image);
+    let html = '<img class="detail-cover" src="' + coverUrl + '" alt="" onerror="this.style.display=\'none\'">' +
+        '<div class="detail-info">' +
+            '<p><strong>' + escapeHtml(album.artist) + '</strong> — ' + escapeHtml(album.title) + '</p>' +
+            (album.year ? '<p style="color:#94a3b8;">' + album.year + '</p>' : '') +
+        '</div>';
+    if (album.genre && album.genre.length) {
+        const genres = Array.isArray(album.genre) ? album.genre : String(album.genre).split(',');
+        html += '<div class="detail-section-title">Genre</div><div class="detail-tags">' +
+            genres.map(g => '<span class="detail-tag">' + escapeHtml(g.trim()) + '</span>').join('') +
+        '</div>';
+    }
+    if (album.label) html += '<div class="detail-section-title">Label</div><p style="color:#94a3b8;font-size:0.9em;">' + escapeHtml(album.label) + '</p>';
+    if (album.condition) html += '<div class="detail-section-title">Condition</div><p style="color:#94a3b8;font-size:0.9em;">' + escapeHtml(album.condition) + '</p>';
+    if (album.notes) html += '<div class="detail-section-title">Notes</div><p style="color:#94a3b8;font-size:0.9em;">' + escapeHtml(album.notes) + '</p>';
+    if (album.info) html += '<div class="detail-section-title">Info</div><p style="color:#94a3b8;font-size:0.9em;">' + escapeHtml(album.info) + '</p>';
+    if (album.price_estimate) html += '<div class="detail-section-title">Est. Price</div><p style="color:#94a3b8;font-size:0.9em;">' + escapeHtml(album.price_estimate) + '</p>';
+    if (album.tags && album.tags.length) {
+        html += '<div class="detail-section-title">Tags</div><div class="detail-tags">' +
+            album.tags.map(t => '<span class="detail-tag">' + escapeHtml(t) + '</span>').join('') +
+        '</div>';
+    }
+    if (album.discogs_url) html += '<div class="detail-section-title">Links</div><a class="detail-link" href="' + album.discogs_url + '" target="_blank">View on Discogs →</a>';
+    if (album.price_range && album.price_range.avg) html += '<div class="detail-section-title">Market Price</div><p style="color:#94a3b8;font-size:0.9em;">Avg: $' + album.price_range.avg.toFixed(2) + '</p>';
+    document.getElementById('detail-content').innerHTML = html;
+    document.getElementById('catalog-form-fields').style.display = 'none';
+    document.getElementById('catalog-form-section').style.display = 'block';
+    document.getElementById('catalog-stats-section').style.display = 'none';
+    document.getElementById('detail-modal').classList.add('open');
+}
+
+document.getElementById('drop-zone').style.display = 'block';
+</script>
+</body>
 </html>
