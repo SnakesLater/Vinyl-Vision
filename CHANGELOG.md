@@ -2,6 +2,35 @@
 
 All notable changes to this experiment branch.
 
+## [beta-3.0] — 2026-05-25
+
+### Added
+- **Qwen hint input**: optional text field per search mode — appended to Qwen prompt as context (e.g. "jazz albums from the 60s")
+- **Group Photo mode**: dedicated tab for uploading a single photo of multiple albums; Qwen identifies each cover, results shown inline with Catalog buttons
+- **Batch Upload mode**: dedicated tab with file picker, per-file progress, inline results with Catalog buttons
+- **Version badge**: small `v3` indicator next to subtitle
+
+### Changed
+- **UI rewrite**: new 2-level tab structure — top tabs `[Search] [Catalog]`, sub-tabs `[Single Album] [Batch Upload] [Group Photo]`
+- **Batch/Group Photo**: moved out of modal into dedicated page sections, visible immediately (no need to fail single upload first)
+- **Catalog form modal**: form fields wrapped in `#catalog-form-fields` for clean separation from album detail view
+- **Modal close**: uses class toggle only (`.open`), no inline `style.display` conflict
+
+### Fixed
+- **`showDetail()`**: was referencing non-existent `#detail-content` element — now writes to the actual element
+- **Duplicate IDs**: `#progress-track` / `#progress-fill` no longer duplicated across single/batch flows
+- **Catalog button**: was inside hidden modal with no way to trigger — replaced with inline "📋 Open Catalog Form" button
+
+### Backend
+- **`hint: str = Form("")`** added to `/search`, `/batch/upload`, `/batch/multi-photo`
+- **`analyze_cover()` and `analyze_cover_multi()`** accept optional hint, prepend as `"Context: {hint}\n\n{prompt}"`
+
+### Files modified
+- `app.html` (full rewrite)
+- `app.py`
+- `lm_studio.py`
+- `CHANGELOG.md`
+
 ## [experiment] — 2026-05-25
 
 ### Added
