@@ -4,7 +4,7 @@ from typing import Optional
 
 LM_STUDIO_URL = "http://localhost:1234/v1/chat/completions"
 _MODEL = "qwen/qwen3.5-9b"
-_TIMEOU_T = 300
+_TIMEOU_T = 600
 _MAX_RETRIES = 3
 _BACKOFF_FACTOR = 2.0
 
@@ -19,15 +19,32 @@ def _detect_mime(header: bytes) -> str:
 
 
 QUICK_PROMPT = (
-    'Identify this album by its visual design. '
+    'Examine this album cover carefully. Consider ALL visual elements — artwork style, '
+    'colors, composition, typography, layout, and any legible text. Many covers use '
+    'stylized, hand-drawn, or hard-to-read text; rely PRIMARILY on the visual design '
+    'and artwork for identification. Text is secondary confirmation.\n\n'
     'Output ONLY valid JSON with artist and title:\n'
     '{"artist": "...", "title": "..."}'
 )
 
+RETRY_PROMPT = (
+    'You previously attempted to identify this cover and got it wrong. Do NOT repeat '
+    'your previous answer. Examine this album cover EXTREMELY carefully — consider '
+    'every visual element: artwork style, colors, composition, typography, layout. '
+    'Many album covers use stylized, hand-drawn, or non-standard text that is hard to '
+    'read; rely PRIMARILY on the visual design and artwork, not text.\n\n'
+    'Context: {context}\n\n'
+    'Take your time and be thorough. Output ONLY valid JSON with artist and title:\n'
+    '{"artist": "...", "title": "..."}'
+)
+
 MULTI_PROMPT = (
-    'List EVERY album cover visible in this image. Be thorough — scan left to right, top to bottom. '
-    'If a cover is partially visible or at an angle, still identify it if you can. '
-    'Rely PRIMARILY on visual style, artwork, colors, and imagery — text is secondary confirmation.\n\n'
+    'Examine this photo EXTREMELY THOROUGHLY. Scan every part of the image — left to right, '
+    'top to bottom, including edges, corners, and partially visible or angled covers. '
+    'List EVERY album cover you can see, even if only partially shown. Look for stacked records, '
+    'leaning albums, anything that could be a cover.\n\n'
+    'Rely PRIMARILY on visual style, artwork, colors, and imagery — text is secondary confirmation '
+    'because many covers use stylized or hard-to-read text.\n\n'
     'Output ONLY valid JSON as an array (one object per album found, empty array if none):\n'
     '[{"artist": "Artist Name", "title": "Album Title"}, ...]\n\n'
     'No markdown, no backticks, no extra text.'
@@ -60,9 +77,10 @@ class QwenClient:
     - Timeout handling
     - JSON parsing cleanup
     """
-    def __init__(self, model: str = _MODEL, timeout: int = _TIMEOU_T):
+    def __init__(self, model: str = _MODEL, timeout: int = _TIMEOU_T, temperature: float = 0.1):
         self.model = model
         self.timeout = timeout
+        self.temperature = temperature
     
     async def _call(self, prompt: str, max_tokens: int, image_bytes: bytes) -> Optional[dict]:
         """Make single API call with error handling."""
@@ -79,7 +97,7 @@ class QwenClient:
                         {"type": "text", "text": prompt},
                     ],
                 }],
-                "temperature": 0.1,
+                "temperature": self.temperature,
                 "max_tokens": max_tokens,
             }
             
@@ -146,7 +164,7 @@ class QwenClient:
                         {"type": "text", "text": prompt},
                     ],
                 }],
-                "temperature": 0.1,
+                "temperature": self.temperature,
                 "max_tokens": max_tokens,
             }
 
@@ -194,27 +212,47 @@ class QwenClient:
 
 # ─── Module-level convenience functions ─────────────────────────────────────────
 
-async def analyze_cover(image_bytes: bytes, hint: str = "") -> dict | None:
-    """Quick ID: artist + title only (fast, ~15-30s)."""
-    client = QwenClient()
-    prompt = QUICK_PROMPT
-    if hint:
-        prompt = f"Context: {hint}\n\n{QUICK_PROMPT}"
-    return await client.analyze(prompt, 1536, image_bytes)
+async def analyze_cover(image_bytes: bytes, hint: str = "", retry_context: str = "", strong_retry: bool = False) -> dict | None:
+    """Quick ID: artist + title only."""
+    if retry_context:
+        safe_ctx = retry_context.replace('{', '{{').replace('}', '}}')
+        prompt = RETRY_PROMPT.format(context=safe_ctx)
+        temp = 0.3 if strong_retry else 0.1
+        client = QwenClient(temperature=temp)
+        result = await client.analyze(prompt, 20000, image_bytes)
+    else:
+        client = QwenClient()
+        prompt = QUICK_PROMPT
+        if hint:
+            prompt = f"Context: {hint}\n\n{QUICK_PROMPT}"
+        result = await client.analyze(prompt, 20000, image_bytes)
+
+    if isinstance(result, list):
+        return result[0] if result else None
+    return result
 
 
 async def analyze_cover_full(image_bytes: bytes) -> dict | None:
     """Full enrichment: year, label, genre, type, info, discogs_id, price_estimate."""
     client = QwenClient()
-    return await client.analyze(FULL_PROMPT, 3072, image_bytes)
+    return await client.analyze(FULL_PROMPT, 20000, image_bytes)
 
 
-async def analyze_cover_multi(image_bytes: bytes, hint: str = "") -> list[dict]:
+async def analyze_cover_multi(image_bytes: bytes, hint: str = "", retry_context: str = "") -> list[dict]:
     """Identify multiple albums in a single photo. Returns a list of {artist, title}."""
     client = QwenClient()
+    if retry_context:
+        prompt = (
+            'You previously identified albums in this photo and got it wrong. '
+            'Do NOT repeat your previous answers. Re-examine EXTREMELY carefully.\n\n'
+            f'Context: {retry_context}\n\n'
+            f'{MULTI_PROMPT}'
+        )
+        result = await client.analyze_multi(prompt, 20000, image_bytes)
+        return result or []
     prompt = MULTI_PROMPT
     if hint:
         prompt = f"Context: {hint}\n\n{MULTI_PROMPT}"
-    result = await client.analyze_multi(prompt, 2048, image_bytes)
+    result = await client.analyze_multi(prompt, 20000, image_bytes)
     return result or []
 

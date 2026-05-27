@@ -2,6 +2,38 @@
 
 All notable changes to this experiment branch.
 
+## [beta-4.0] — 2026-05-26
+
+### Added
+- **Retry buttons**: per-result ✏️ Retry button on Batch Upload and Group Photo items; inline context form with Send/Cancel
+- **Single album Retry**: 🔁 Retry button alongside hint text field — sends steering context to Qwen for a fresh identification
+- **Retry context** (`retry_context`): backend accepts on `/search` and `/batch/multi-photo`; wraps with "you got it wrong, try harder" preamble
+- **Strong retry mode**: single album retries use temperature 0.3 for more varied answers + emphatic "don't repeat yourself" prompt
+- **Async retries**: batch/group retries run independently — catalog other results and queue multiple retries while others process
+- **`RETRY_PROMPT`**: new prompt constant in `lm_studio.py` with `{context}` placeholder
+
+### Changed
+- **Removed Tier 1 CLIP index shortcut**: every search now always runs Qwen → MB → CAA → ranking. No instant re-matches from local index.
+- **Max tokens**: all Qwen calls bumped to **20000** (was 1536/3072/2048)
+- **LM Studio timeout**: 300s → **600s**
+- **Qwen prompts**: `QUICK_PROMPT` and `MULTI_PROMPT` rewritten with stronger "visual-first, be thorough" language
+- **`QwenClient`**: now accepts `temperature` parameter (default 0.1)
+- **Singe mode UX**: hint text is now a flex row with Retry button; Retry disabled until an image is loaded
+- **Batch result indexing**: fixed bug where `catalogBatchResult()` used subset index instead of original file index — Catalog grabbed wrong file if a prior file had errored
+- **Version badge**: v3 → v4
+- **API docstring**: cleaned up (removed outdated Phase 1/2 references)
+
+### Fixed
+- **`RETRY_PROMPT.format()` crash**: user steering text with `{` or `}` chars would crash with `KeyError` — now escaped before `.format()`
+- **Wasteful `QwenClient()` creation**: strong retry no longer creates a default client only to immediately replace it
+- **Qwen returning list instead of dict**: `analyze_cover()` now checks for `isinstance(result, list)` and extracts the first element (Qwen sometimes wraps JSON in an array)
+
+### Files modified
+- `app.py`
+- `lm_studio.py`
+- `app.html`
+- `CHANGELOG.md`
+
 ## [beta-3.0] — 2026-05-25
 
 ### Added

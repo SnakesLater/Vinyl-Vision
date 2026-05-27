@@ -1,12 +1,6 @@
 """
-Vinyl-Vision Production API v0.2 — Optimized Record Catalog System
-
-Optimizations Applied (Phase 1 & 2):
-• Image preprocessing for CLIP consistency and efficiency
-• CLIP LRU caching (100 entries, tracks hits/misses)
-• LM Studio retry with exponential backoff
-• HTTP client pooling for MusicBrainz connections
-• Discogs rate limiting to prevent API blocks
+Vinyl-Vision Production API v0.3 — Record Catalog System
+LM Studio vision → MusicBrainz → CAA → CLIP ranking → Discogs enrichment
 """
 
 import os, json, io, httpx, asyncio, datetime
@@ -240,10 +234,10 @@ class Catalog:
 catalog = Catalog(CATALOG_DIR / "catalog.json")
 
 
-async def _process_image(image_bytes: bytes, hint: str = "") -> dict:
+async def _process_image(image_bytes: bytes, hint: str = "", retry_context: str = "") -> dict:
     """Run the full search pipeline on image bytes.
 
-    Returns a dict with keys: candidates, fallback, qwen_meta, message, from_index.
+    Returns a dict with keys: candidates, fallback, qwen_meta, message.
     """
     global _last_search_embedding, _last_qwen_result
 
@@ -254,14 +248,8 @@ async def _process_image(image_bytes: bytes, hint: str = "") -> dict:
     embedding = image_match.compute_embedding(image_bytes)
     _last_search_embedding = embedding
 
-    # Tier 1: local index (instant re-match)
-    match = image_match.search_index(embedding)
-    if match:
-        print(f"[search] local index hit: {match['artist']} - {match['title']} ({match['similarity']})")
-        return {"candidates": [match], "fallback": False, "from_index": True}
-
-    # Tier 2: LM Studio vision model — quick ID (artist + title)
-    result = await analyze_cover(image_bytes, hint)
+    # LM Studio vision model — quick ID (artist + title)
+    result = await analyze_cover(image_bytes, hint, retry_context, strong_retry=bool(retry_context))
     _last_qwen_result = result
 
     if not result:
@@ -326,12 +314,12 @@ async def get_catalog():
 
 
 @app.post("/search")
-async def search(image: UploadFile = File(...), hint: str = Form("")):
-    """Drop image -> CLIP index -> LM Studio -> MB -> CAA -> CLIP rank -> candidates"""
+async def search(image: UploadFile = File(...), hint: str = Form(""), retry_context: str = Form("")):
+    """Drop image -> LM Studio -> MB -> CAA -> CLIP rank -> candidates"""
     img_bytes = await image.read()
     if not img_bytes:
         raise HTTPException(400, "No image file provided")
-    return await _process_image(img_bytes, hint)
+    return await _process_image(img_bytes, hint, retry_context)
 
 
 @app.post("/batch/upload")
